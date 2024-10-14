@@ -290,10 +290,10 @@ public class AnalLexico {
 
                     while((proxChar = ldat.lerProxCaractere()) != -1){
                         if (proxChar == '\n'){
-                            break;
+                            ldat.caractereAnterior();
+                            return new Token(comentario.toString(), TipoToken.Comentario, linhaAtual);
                         }
                     }
-                    return new Token(comentario.toString(), TipoToken.Comentario, linhaAtual);
                 }
 
                 // +  Soma
