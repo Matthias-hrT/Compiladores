@@ -283,6 +283,16 @@ public class AnalLexico {
                     break;
                 }
 
+                // # Comentário
+                case '#':{
+                    StringBuilder comentario = new StringBuilder();
+
+                    while((proxChar == ldat.lerProxCaractere()) != -1 || proxChar == ldat.lerProxCaractere() != '\n'){
+                        comentario.append((char)proxChar);
+                    }
+                    return new Token(comentario.toString(), TipoToken.Comentario, linhaAtual);
+                }
+
                 // +  Soma
                 case '+': return new Token("+", TipoToken.OpAritSoma, linhaAtual);
 
