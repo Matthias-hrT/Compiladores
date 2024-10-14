@@ -67,6 +67,7 @@ public class AnalLexico {
                     if (proxChar == '=') {
                         return new Token(":=", TipoToken.Atrib, linhaAtual);
                     }
+                    ldat.caractereAnterior();
                     return new Token(":", TipoToken.Delim, linhaAtual);
                 }
 
@@ -287,8 +288,10 @@ public class AnalLexico {
                 case '#':{
                     StringBuilder comentario = new StringBuilder();
 
-                    while((proxChar == ldat.lerProxCaractere()) != -1 || proxChar == ldat.lerProxCaractere() != '\n'){
-                        comentario.append((char)proxChar);
+                    while((proxChar = ldat.lerProxCaractere()) != -1){
+                        if (proxChar == '\n'){
+                            break;
+                        }
                     }
                     return new Token(comentario.toString(), TipoToken.Comentario, linhaAtual);
                 }
