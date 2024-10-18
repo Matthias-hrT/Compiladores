@@ -329,12 +329,13 @@ public class AnalLexico {
                     }
                     else if (Character.isDigit(ch)){
                         boolean isReal = false;
-                        while ((proxChar = ldat.lerProxCaractere()) != -1  &&
-                                (Character.isDigit(proxChar) || proxChar == '.')){
-                            isReal = true;
+                        while ((proxChar = ldat.lerProxCaractere()) != -1  && (Character.isDigit(proxChar) || proxChar == '.')){
                             buffer.append((char)proxChar);
+                            if (proxChar == '.') {
+                                isReal = true;
+                            }
                         }
-
+                        ldat.caractereAnterior();
                         if (isReal){
                             return new Token(buffer.toString(), TipoToken.NumReal, linhaAtual);
                         } else {
