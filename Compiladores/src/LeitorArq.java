@@ -10,7 +10,7 @@ public class LeitorArq {
     private int bufferAtual;
     private boolean usandoBuffer1;
 
-    private static final int TAMANHO_BUFFER = 1024;
+    private static final int TAMANHO_BUFFER = 8;
 
     public LeitorArq(String arq) {
         try {
