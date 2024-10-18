@@ -35,12 +35,8 @@ public class AnalLexico {
                     if (proxChar == '=') {
                         return new Token("==", TipoToken.OpRelIgual, linhaAtual);
                     }
-                    else{
-                        System.out.println("Erro: simbolo inexistente '"+ ch + "'" + " na linha " + linhaAtual);
-
-                        ldat.caractereAnterior();
-                        continue;
-                    }
+                    System.out.println("Erro na linha " + linhaAtual);
+                    return null;
                 }
 
                 // <  <=  Menor/Menor Igual
@@ -77,8 +73,8 @@ public class AnalLexico {
                     if (proxChar == '=') {
                         return new Token("!=", TipoToken.OpRelDif, linhaAtual);
                     }
-                    System.out.println("Erro: simbolo inexistente '"+ ch + "'" + " na linha " + linhaAtual);
-                    continue;
+                    System.out.println("Erro na linha " + linhaAtual);
+                    return null;
                 }
 
                 //cases com Letras
@@ -96,9 +92,7 @@ public class AnalLexico {
                                 if (proxChar == 'O') {
                                     return new Token("ENTAO", TipoToken.PCEntao, linhaAtual);
                                 }
-                                ldat.caractereAnterior();
                             }
-                            ldat.caractereAnterior();
                         }
                         if (proxChar == 'Q') {
                             proxChar = ldat.lerProxCaractere();
@@ -107,11 +101,10 @@ public class AnalLexico {
                                 if (proxChar == 'O') {
                                     return new Token("ENQTO", TipoToken.PCEnqto, linhaAtual);
                                 }
-                                ldat.caractereAnterior();
                             }
-                            ldat.caractereAnterior();
                         }
-                        continue;
+                        System.out.println("Erro na linha " + linhaAtual);
+                        return null;
                     }
                     ldat.caractereAnterior();
                     return new Token("E", TipoToken.OpBoolE, linhaAtual);
@@ -122,11 +115,8 @@ public class AnalLexico {
                     if (proxChar == 'U') {
                         return new Token("OU", TipoToken.OpBoolOu, linhaAtual);
                     }
-                    else{
-                        System.out.println("Erro: simbolo inexistente '"+ ch + "'" + " na linha " + linhaAtual);
-                        ldat.caractereAnterior();
-                        continue;
-                    }
+                    System.out.println("Erro na linha " + linhaAtual);
+                    return null;
                 }
 
                 // DEC
@@ -137,10 +127,9 @@ public class AnalLexico {
                         if (proxChar == 'C') {
                             return new Token("DEC", TipoToken.PCDec, linhaAtual);
                         }
-                        ldat.caractereAnterior();
                     }
-                    ldat.caractereAnterior();
-                    continue;
+                    System.out.println("Erro na linha " + linhaAtual);
+                    return null;
                 }
 
                 // PROG
@@ -153,14 +142,10 @@ public class AnalLexico {
                             if (proxChar == 'G') {
                                 return new Token("PROG", TipoToken.PCProg, linhaAtual);
                             }
-                            ldat.caractereAnterior();
-                            continue;
                         }
-                        ldat.caractereAnterior();
-                        continue;
                     }
-                    ldat.caractereAnterior();
-                    continue;
+                    System.out.println("Erro na linha " + linhaAtual);
+                    return null;
                 }
 
                 //SE
@@ -169,9 +154,8 @@ public class AnalLexico {
                     if (proxChar == 'E') {
                         return new Token("SE", TipoToken.PCSe, linhaAtual);
                     }
-                    System.out.println("Erro: simbolo inexistente '"+ ch + "'" + " na linha " + linhaAtual);
-                    ldat.caractereAnterior();
-                    continue;
+                    System.out.println("Erro na linha " + linhaAtual);
+                    return null;
                 }
 
                 // INI, INT, IMPRIMIR
@@ -199,26 +183,14 @@ public class AnalLexico {
                                             if (proxChar == 'R'){
                                                 return new Token("IMPRIMIR", TipoToken.PCImprimir, linhaAtual);
                                             }
-                                            ldat.caractereAnterior();
-                                            continue;
                                         }
-                                        ldat.caractereAnterior();
-                                        continue;
                                     }
-                                    ldat.caractereAnterior();
-                                    continue;
                                 }
-                                ldat.caractereAnterior();
-                                continue;
                             }
-                            ldat.caractereAnterior();
-                            continue;
                         }
-                        ldat.caractereAnterior();
-                        continue;
                     }
-                    ldat.caractereAnterior();
-                    continue;
+                    System.out.println("Erro na linha " + linhaAtual);
+                    return null;
                 }
 
                 // FIM
@@ -229,11 +201,9 @@ public class AnalLexico {
                         if (proxChar == 'M') {
                             return new Token("FIM", TipoToken.PCFim, linhaAtual);
                         }
-                        ldat.caractereAnterior();
-                        continue;
                     }
-                    ldat.caractereAnterior();
-                    continue;
+                    System.out.println("Erro na linha " + linhaAtual);
+                    return null;
                 }
 
                 // REAL
@@ -246,14 +216,10 @@ public class AnalLexico {
                             if (proxChar == 'L') {
                                 return new Token("REAL", TipoToken.PCReal, linhaAtual);
                             }
-                            ldat.caractereAnterior();
-                            continue;
                         }
-                        ldat.caractereAnterior();
-                        continue;
                     }
-                    ldat.caractereAnterior();
-                    continue;
+                    System.out.println("Erro na linha " + linhaAtual);
+                    return null;
                 }
 
                 // LER
@@ -264,11 +230,9 @@ public class AnalLexico {
                         if (proxChar == 'R') {
                             return new Token("LER", TipoToken.PCLer, linhaAtual);
                         }
-                        ldat.caractereAnterior();
-                        continue;
                     }
-                    ldat.caractereAnterior();
-                    continue;
+                    System.out.println("Erro na linha " + linhaAtual);
+                    return null;
                 }
 
                 // CADEIA
