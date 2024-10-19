@@ -20,7 +20,19 @@ public class LeitorArq {
             index = 0;
             bufferAtual = 0;
             usandoBuffer1 = true;
-            carregarProximoBuffer();
+            carregarBuffer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void carregarBuffer() {
+        try {
+            bufferAtual = leitor.read(buffer1, 0, TAMANHO_BUFFER);
+            if (bufferAtual == TAMANHO_BUFFER) {
+                // Se o buffer1 foi totalmente preenchido, carregue o buffer2
+                bufferAtual = leitor.read(buffer2, 0, TAMANHO_BUFFER);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -29,9 +41,9 @@ public class LeitorArq {
     private void carregarProximoBuffer() {
         try {
             if (usandoBuffer1) {
-                bufferAtual = leitor.read(buffer1, 0, TAMANHO_BUFFER);
-            } else {
                 bufferAtual = leitor.read(buffer2, 0, TAMANHO_BUFFER);
+            } else {
+                bufferAtual = leitor.read(buffer1, 0, TAMANHO_BUFFER);
             }
             index = 0;  // Reinicializa o índice para o novo buffer
         } catch (IOException e) {
