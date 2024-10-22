@@ -11,7 +11,7 @@ public class Token {
 
     @Override
     public String toString(){
-        return "<" + tipo + "," + lexema + "," + linha + ">";
+        return "<" + tipo + ",\"" + lexema + "\"," + linha + ">";
     }
 
     public String getLexema() {

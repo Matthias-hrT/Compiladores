@@ -2,13 +2,20 @@
 public class AnalLexico {
     LeitorArq ldat;
     int linhaAtual;
+    boolean fimArq;
 
     public AnalLexico(String arq){
         this.ldat = new LeitorArq(arq);
         this.linhaAtual = 1;
+        this.fimArq = false;
     }
 
     public Token proxToken(){
+
+        if (fimArq){
+            return null;
+        }
+
         int c;
         char ch;
         int proxChar;
@@ -177,7 +184,7 @@ public class AnalLexico {
                 }
             }
         }
-        return null;
+        fimArq = true;
+        return new Token("EOF", TipoToken.EOF, linhaAtual);
     }
-
 }
