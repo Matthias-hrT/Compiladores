@@ -17,7 +17,7 @@ public class AnalLexico {
             ch = (char) c;
 
             // Espaço
-            if (ch == ' '){
+            if (ch == ' ' || ch == '\t' || ch == '\r'){
                 continue;
             }
 
@@ -35,7 +35,7 @@ public class AnalLexico {
                     if (proxChar == '=') {
                         return new Token("==", TipoToken.OpRelIgual, linhaAtual);
                     }
-                    System.out.println("Erro na linha " + linhaAtual);
+                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
                     return null;
                 }
 
@@ -73,41 +73,48 @@ public class AnalLexico {
                     if (proxChar == '=') {
                         return new Token("!=", TipoToken.OpRelDif, linhaAtual);
                     }
-                    System.out.println("Erro na linha " + linhaAtual);
+                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
                     return null;
                 }
 
                 //cases com Letras
 
+                    /*
                 // E, ENTAO, ENQTO
                 case 'E': {
+                    StringBuilder buffer = new StringBuilder();
                     proxChar = ldat.lerProxCaractere();
-
+                    buffer.append(ch);
                     if (proxChar == 'N') {
+                        buffer.append((char)proxChar);
                         proxChar = ldat.lerProxCaractere();
                         if (proxChar == 'T') {
+                            buffer.append((char)proxChar);
                             proxChar = ldat.lerProxCaractere();
                             if (proxChar == 'A') {
+                                buffer.append((char)proxChar);
                                 proxChar = ldat.lerProxCaractere();
                                 if (proxChar == 'O') {
-                                    return new Token("ENTAO", TipoToken.PCEntao, linhaAtual);
+                                    buffer.append((char)proxChar);
+                                    return new Token(buffer.toString(), TipoToken.PCEntao, linhaAtual);
                                 }
                             }
-                        }
-                        if (proxChar == 'Q') {
+                        } else if (proxChar == 'Q') {
+                            buffer.append((char)proxChar);
                             proxChar = ldat.lerProxCaractere();
                             if (proxChar == 'T') {
+                                buffer.append((char)proxChar);
                                 proxChar = ldat.lerProxCaractere();
                                 if (proxChar == 'O') {
-                                    return new Token("ENQTO", TipoToken.PCEnqto, linhaAtual);
+                                    buffer.append((char)proxChar);
+                                    return new Token(buffer.toString(), TipoToken.PCEnqto, linhaAtual);
                                 }
                             }
                         }
-                        System.out.println("Erro na linha " + linhaAtual);
-                        return null;
                     }
-                    ldat.caractereAnterior();
-                    return new Token("E", TipoToken.OpBoolE, linhaAtual);
+                    String palavra = buffer.toString();
+                    System.out.println("Erro Léxico: desconhecido < " + palavra + " > na linha " + linhaAtual);
+                    return null;
                 }
                 // OU
                 case 'O': {
@@ -115,7 +122,7 @@ public class AnalLexico {
                     if (proxChar == 'U') {
                         return new Token("OU", TipoToken.OpBoolOu, linhaAtual);
                     }
-                    System.out.println("Erro na linha " + linhaAtual);
+                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
                     return null;
                 }
 
@@ -128,7 +135,7 @@ public class AnalLexico {
                             return new Token("DEC", TipoToken.PCDec, linhaAtual);
                         }
                     }
-                    System.out.println("Erro na linha " + linhaAtual);
+                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
                     return null;
                 }
 
@@ -144,7 +151,7 @@ public class AnalLexico {
                             }
                         }
                     }
-                    System.out.println("Erro na linha " + linhaAtual);
+                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
                     return null;
                 }
 
@@ -154,7 +161,7 @@ public class AnalLexico {
                     if (proxChar == 'E') {
                         return new Token("SE", TipoToken.PCSe, linhaAtual);
                     }
-                    System.out.println("Erro na linha " + linhaAtual);
+                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
                     return null;
                 }
 
@@ -189,7 +196,7 @@ public class AnalLexico {
                             }
                         }
                     }
-                    System.out.println("Erro na linha " + linhaAtual);
+                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
                     return null;
                 }
 
@@ -202,7 +209,7 @@ public class AnalLexico {
                             return new Token("FIM", TipoToken.PCFim, linhaAtual);
                         }
                     }
-                    System.out.println("Erro na linha " + linhaAtual);
+                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
                     return null;
                 }
 
@@ -218,7 +225,7 @@ public class AnalLexico {
                             }
                         }
                     }
-                    System.out.println("Erro na linha " + linhaAtual);
+                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
                     return null;
                 }
 
@@ -231,10 +238,10 @@ public class AnalLexico {
                             return new Token("LER", TipoToken.PCLer, linhaAtual);
                         }
                     }
-                    System.out.println("Erro na linha " + linhaAtual);
+                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
                     return null;
                 }
-
+*/
                 // CADEIA
                 case '"':{
                     StringBuilder cadeia = new StringBuilder();
@@ -245,7 +252,8 @@ public class AnalLexico {
                        }
                         cadeia.append((char)proxChar);
                     }
-                    break;
+                    System.out.println("Erro Léxico: desconhecido caractere "+ ch + " na linha " + linhaAtual);
+                    return null;
                 }
 
                 // # Comentário
@@ -306,10 +314,33 @@ public class AnalLexico {
                             return new Token(buffer.toString(), TipoToken.NumInt, linhaAtual);
                         }
                     }
-                    break;
+                    else if (Character.isUpperCase(ch)){
+                        while ((proxChar = ldat.lerProxCaractere()) != -1 && Character.isUpperCase(proxChar)){
+                            buffer.append((char)proxChar);
+                        }
+                    }
+                    String palavra = buffer.toString();
+                    return switch (palavra) {
+                        case "ENTAO" -> new Token(palavra, TipoToken.PCEntao, linhaAtual);
+                        case "ENQTO" -> new Token(palavra, TipoToken.PCEnqto, linhaAtual);
+                        case "DEC" -> new Token(palavra, TipoToken.PCDec, linhaAtual);
+                        case "PROG" -> new Token(palavra, TipoToken.PCProg, linhaAtual);
+                        case "SE" -> new Token(palavra, TipoToken.PCSe, linhaAtual);
+                        case "INI" -> new Token(palavra, TipoToken.PCIni, linhaAtual);
+                        case "INT" -> new Token(palavra, TipoToken.PCInt, linhaAtual);
+                        case "IMPRIMIR" -> new Token(palavra, TipoToken.PCImprimir, linhaAtual);
+                        case "FIM" -> new Token(palavra, TipoToken.PCFim, linhaAtual);
+                        case "REAL" -> new Token(palavra, TipoToken.PCReal, linhaAtual);
+                        case "LER" -> new Token(palavra, TipoToken.PCLer, linhaAtual);
+                        default -> {
+                            System.out.println("Erro Léxico: caractere desconhecido < " + palavra + " > na linha " + linhaAtual);
+                            yield null;
+                        }
+                    };
                 }
             }
         }
         return null;
     }
+
 }
