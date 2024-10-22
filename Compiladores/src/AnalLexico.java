@@ -35,7 +35,7 @@ public class AnalLexico {
                     if (proxChar == '=') {
                         return new Token("==", TipoToken.OpRelIgual, linhaAtual);
                     }
-                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
+                    System.out.println("Erro Léxico: < " + ch + " > linha " + linhaAtual);
                     return null;
                 }
 
@@ -73,175 +73,10 @@ public class AnalLexico {
                     if (proxChar == '=') {
                         return new Token("!=", TipoToken.OpRelDif, linhaAtual);
                     }
-                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
+                    System.out.println("Erro Léxico: < " + ch + " > linha " + linhaAtual);
                     return null;
                 }
 
-                //cases com Letras
-
-                    /*
-                // E, ENTAO, ENQTO
-                case 'E': {
-                    StringBuilder buffer = new StringBuilder();
-                    proxChar = ldat.lerProxCaractere();
-                    buffer.append(ch);
-                    if (proxChar == 'N') {
-                        buffer.append((char)proxChar);
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'T') {
-                            buffer.append((char)proxChar);
-                            proxChar = ldat.lerProxCaractere();
-                            if (proxChar == 'A') {
-                                buffer.append((char)proxChar);
-                                proxChar = ldat.lerProxCaractere();
-                                if (proxChar == 'O') {
-                                    buffer.append((char)proxChar);
-                                    return new Token(buffer.toString(), TipoToken.PCEntao, linhaAtual);
-                                }
-                            }
-                        } else if (proxChar == 'Q') {
-                            buffer.append((char)proxChar);
-                            proxChar = ldat.lerProxCaractere();
-                            if (proxChar == 'T') {
-                                buffer.append((char)proxChar);
-                                proxChar = ldat.lerProxCaractere();
-                                if (proxChar == 'O') {
-                                    buffer.append((char)proxChar);
-                                    return new Token(buffer.toString(), TipoToken.PCEnqto, linhaAtual);
-                                }
-                            }
-                        }
-                    }
-                    String palavra = buffer.toString();
-                    System.out.println("Erro Léxico: desconhecido < " + palavra + " > na linha " + linhaAtual);
-                    return null;
-                }
-                // OU
-                case 'O': {
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'U') {
-                        return new Token("OU", TipoToken.OpBoolOu, linhaAtual);
-                    }
-                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
-                    return null;
-                }
-
-                // DEC
-                case 'D':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'E') {
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'C') {
-                            return new Token("DEC", TipoToken.PCDec, linhaAtual);
-                        }
-                    }
-                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
-                    return null;
-                }
-
-                // PROG
-                case 'P':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'R') {
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'O') {
-                            proxChar = ldat.lerProxCaractere();
-                            if (proxChar == 'G') {
-                                return new Token("PROG", TipoToken.PCProg, linhaAtual);
-                            }
-                        }
-                    }
-                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
-                    return null;
-                }
-
-                //SE
-                case 'S':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'E') {
-                        return new Token("SE", TipoToken.PCSe, linhaAtual);
-                    }
-                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
-                    return null;
-                }
-
-                // INI, INT, IMPRIMIR
-                case 'I':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'N') {
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'I') {
-                            return new Token("INI", TipoToken.PCIni, linhaAtual);
-                        }else if(proxChar == 'T') {
-                            return new Token("INT", TipoToken.PCInt, linhaAtual);
-                        }
-                    }else if(proxChar == 'M'){
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'P') {
-                            proxChar = ldat.lerProxCaractere();
-                            if (proxChar == 'R') {
-                                proxChar = ldat.lerProxCaractere();
-                                if (proxChar == 'I') {
-                                    proxChar = ldat.lerProxCaractere();
-                                    if(proxChar == 'M'){
-                                        proxChar = ldat.lerProxCaractere();
-                                        if (proxChar == 'I'){
-                                            proxChar = ldat.lerProxCaractere();
-                                            if (proxChar == 'R'){
-                                                return new Token("IMPRIMIR", TipoToken.PCImprimir, linhaAtual);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
-                    return null;
-                }
-
-                // FIM
-                case 'F':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'I') {
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'M') {
-                            return new Token("FIM", TipoToken.PCFim, linhaAtual);
-                        }
-                    }
-                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
-                    return null;
-                }
-
-                // REAL
-                case 'R':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'E') {
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'A') {
-                            proxChar = ldat.lerProxCaractere();
-                            if (proxChar == 'L') {
-                                return new Token("REAL", TipoToken.PCReal, linhaAtual);
-                            }
-                        }
-                    }
-                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
-                    return null;
-                }
-
-                // LER
-                case 'L':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'E') {
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'R') {
-                            return new Token("LER", TipoToken.PCLer, linhaAtual);
-                        }
-                    }
-                    System.out.println("Erro Léxico: < " + ch + " > na linha " + linhaAtual);
-                    return null;
-                }
-*/
                 // CADEIA
                 case '"':{
                     StringBuilder cadeia = new StringBuilder();
@@ -252,7 +87,7 @@ public class AnalLexico {
                        }
                         cadeia.append((char)proxChar);
                     }
-                    System.out.println("Erro Léxico: desconhecido caractere "+ ch + " na linha " + linhaAtual);
+                    System.out.println("Erro Léxico: desconhecido caractere "+ ch + " linha " + linhaAtual);
                     return null;
                 }
 
@@ -266,6 +101,7 @@ public class AnalLexico {
                             return new Token(comentario.toString(), TipoToken.Comentario, linhaAtual);
                         }
                     }
+                    return new Token(comentario.toString(), TipoToken.Comentario, linhaAtual);
                 }
 
                 // +  Soma
@@ -308,17 +144,16 @@ public class AnalLexico {
                             }
                         }
                         ldat.caractereAnterior();
-                        if (isReal){
-                            return new Token(buffer.toString(), TipoToken.NumReal, linhaAtual);
-                        } else {
-                            return new Token(buffer.toString(), TipoToken.NumInt, linhaAtual);
-                        }
+                        return isReal ? new Token(buffer.toString(), TipoToken.NumReal, linhaAtual) :
+                                new Token(buffer.toString(), TipoToken.NumInt, linhaAtual);
                     }
                     else if (Character.isUpperCase(ch)){
-                        while ((proxChar = ldat.lerProxCaractere()) != -1 && Character.isUpperCase(proxChar)){
+                        while ((proxChar = ldat.lerProxCaractere()) != -1 && Character.isLetterOrDigit(proxChar)){
                             buffer.append((char)proxChar);
                         }
+                        ldat.caractereAnterior();
                     }
+
                     String palavra = buffer.toString();
                     return switch (palavra) {
                         case "ENTAO" -> new Token(palavra, TipoToken.PCEntao, linhaAtual);
@@ -332,8 +167,10 @@ public class AnalLexico {
                         case "FIM" -> new Token(palavra, TipoToken.PCFim, linhaAtual);
                         case "REAL" -> new Token(palavra, TipoToken.PCReal, linhaAtual);
                         case "LER" -> new Token(palavra, TipoToken.PCLer, linhaAtual);
+                        case "E" -> new Token(palavra, TipoToken.OpBoolE, linhaAtual);
+                        case "OU" -> new Token(palavra, TipoToken.OpBoolOu, linhaAtual);
                         default -> {
-                            System.out.println("Erro Léxico: caractere desconhecido < " + palavra + " > na linha " + linhaAtual);
+                            System.out.println("Erro Léxico: desconhecido < " + palavra + " > linha " + linhaAtual);
                             yield null;
                         }
                     };
