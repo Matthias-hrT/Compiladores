@@ -3,11 +3,17 @@ public class AnalLexico {
     LeitorArq ldat;
     int linhaAtual;
     boolean fimArq;
+    boolean erro;
 
     public AnalLexico(String arq){
         this.ldat = new LeitorArq(arq);
         this.linhaAtual = 1;
         this.fimArq = false;
+        this.erro = false;
+    }
+
+    public boolean temErro(){
+        return erro;
     }
 
     public Token proxToken(){
@@ -43,6 +49,7 @@ public class AnalLexico {
                         return new Token("==", TipoToken.OpRelIgual, linhaAtual);
                     }
                     System.out.println("Erro Léxico: < " + ch + " > linha " + linhaAtual);
+                    erro = true;
                     return null;
                 }
 
@@ -81,6 +88,7 @@ public class AnalLexico {
                         return new Token("!=", TipoToken.OpRelDif, linhaAtual);
                     }
                     System.out.println("Erro Léxico: < " + ch + " > linha " + linhaAtual);
+                    erro = true;
                     return null;
                 }
 
@@ -95,6 +103,7 @@ public class AnalLexico {
                         cadeia.append((char)proxChar);
                     }
                     System.out.println("Erro Léxico: desconhecido caractere "+ ch + " linha " + linhaAtual);
+                    erro = true;
                     return null;
                 }
 
@@ -178,6 +187,7 @@ public class AnalLexico {
                         case "OU" -> new Token(palavra, TipoToken.OpBoolOu, linhaAtual);
                         default -> {
                             System.out.println("Erro Léxico: desconhecido < " + palavra + " > linha " + linhaAtual);
+                            erro = true;
                             yield null;
                         }
                     };
