@@ -3,7 +3,7 @@ public class Main {
     public static void main(String[] args) {
 
         AnalLexico lex =  new AnalLexico("C:\\Users\\Hirata\\IdeaProjects\\Compiladores\\programa1.gyh");
-        TabelaDeSimbolos tabela = new TabelaDeSimbolos();
+        TabelaSimbolos tabela = new TabelaSimbolos();
         Token t = lex.proxToken();
 
         while(t != null && !lex.temErro()){
