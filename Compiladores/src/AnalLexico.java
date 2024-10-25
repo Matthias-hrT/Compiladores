@@ -3,28 +3,17 @@ public class AnalLexico {
     LeitorArq ldat;
     int linhaAtual; //Armazena o número da linha
     boolean fimArq; //Variável para verificar o fim do arquivo
-    boolean erro; //Variável para identificar erros
-
     //Inicializa as variáveis
     public AnalLexico(String arq){
         this.ldat = new LeitorArq(arq);
         this.linhaAtual = 1;
         this.fimArq = false;
-        this.erro = false;
     }
-
-    // Metodo para verificar se houve um erro léxico
-    public boolean temErro(){
-        return erro;
-    }
-
     public Token proxToken(){
-
         // Verifica se chegou no fim do arquivo
         if (fimArq){
             return null;
         }
-
         int c;
         char ch;
         int proxChar;
@@ -32,18 +21,15 @@ public class AnalLexico {
         // Loop para processar os caracteres do buffer
         while((c = ldat.lerProxCaractere()) != -1){
             ch = (char) c;
-
             // Espaços em branco e tabs
             if (ch == ' ' || ch == '\t' || ch == '\r'){
                 continue;
             }
-
             // Prox Linha
             if (ch == '\n'){
                 linhaAtual++;
                 continue;
             }
-
             switch(ch){
                 // == Igual
                 case '=': {
@@ -52,10 +38,8 @@ public class AnalLexico {
                         return new Token("==", TipoToken.OpRelIgual, linhaAtual);
                     }
                     System.out.println("Erro Léxico: < " + ch + " > linha " + linhaAtual);
-                    erro = true;
                     return null;
                 }
-
                 // <  <=  Menor/Menor Igual
                 case '<': {
                     proxChar = ldat.lerProxCaractere();
@@ -64,7 +48,6 @@ public class AnalLexico {
                     }
                     return new Token("<", TipoToken.OpRelMenor, linhaAtual);
                 }
-
                 // >  >=  Maior/Maior Igual
                 case '>': {
                     proxChar = ldat.lerProxCaractere();
@@ -73,7 +56,6 @@ public class AnalLexico {
                     }
                     return new Token(">", TipoToken.OpRelMaior, linhaAtual);
                 }
-
                 // :  :=   Delimitador/Atribuição
                 case ':': {
                     proxChar = ldat.lerProxCaractere();
@@ -83,7 +65,6 @@ public class AnalLexico {
                     ldat.caractereAnterior();
                     return new Token(":", TipoToken.Delim, linhaAtual);
                 }
-
                 // != Diferente
                 case '!': {
                     proxChar = ldat.lerProxCaractere();
@@ -91,10 +72,8 @@ public class AnalLexico {
                         return new Token("!=", TipoToken.OpRelDif, linhaAtual);
                     }
                     System.out.println("Erro Léxico: < " + ch + " > linha " + linhaAtual);
-                    erro = true;
                     return null;
                 }
-
                 // CADEIA
                 case '"':{
                     StringBuilder cadeia = new StringBuilder();
@@ -106,10 +85,8 @@ public class AnalLexico {
                         cadeia.append((char)proxChar);
                     }
                     System.out.println("Erro Léxico: desconhecido caractere "+ ch + " linha " + linhaAtual);
-                    erro = true;
                     return null;
                 }
-
                 // # Comentário
                 case '#':{
                     StringBuilder comentario = new StringBuilder();
@@ -122,25 +99,18 @@ public class AnalLexico {
                     }
                     return new Token(comentario.toString(), TipoToken.Comentario, linhaAtual);
                 }
-
                 // +  Soma
                 case '+': return new Token("+", TipoToken.OpAritSoma, linhaAtual);
-
                 // - Subtração
                 case '-': return new Token("-", TipoToken.OpAritSub, linhaAtual);
-
                 // *  Multiplicação
                 case '*': return new Token("*", TipoToken.OpAritMult, linhaAtual);
-
                 // /  Divisão
                 case '/': return new Token("/", TipoToken.OpAritDiv, linhaAtual);
-
                 // (  Abre Parentesis
                 case '(': return new Token("(", TipoToken.AbrePar, linhaAtual);
-
                 // )  Fecha Parentesis
                 case ')': return new Token(")", TipoToken.FechaPar, linhaAtual);
-
                 // Identificação de variáveis, números e palavras-chave e booleanos
                 default:{
                     StringBuilder buffer = new StringBuilder();
@@ -173,7 +143,6 @@ public class AnalLexico {
                         }
                         ldat.caractereAnterior();
                     }
-
                     //Identifica lexemas de palavras-chave e booleanos
                     String palavra = buffer.toString();
                     return switch (palavra) {
@@ -192,7 +161,6 @@ public class AnalLexico {
                         case "OU" -> new Token(palavra, TipoToken.OpBoolOu, linhaAtual);
                         default -> {
                             System.out.println("Erro Léxico: desconhecido < " + palavra + " > linha " + linhaAtual);
-                            erro = true;
                             yield null;
                         }
                     };

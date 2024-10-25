@@ -16,14 +16,11 @@ public class Main {
         Token t = lex.proxToken();
 
         // Continua a leitura de tokens enquanto não houver erro e não for o fim do arquivo
-        while(t != null && !lex.temErro()){
+        while(t != null){
             tabela.adicionarToken(t); // Adiciona o token à tabela de símbolos
             t = lex.proxToken();      // Lê o próximo token
         }
+        tabela.exibirTokens();
 
-        // Se nenhum erro léxico foi encontrado, exibe todos os tokens armazenados na tabela
-        if(!lex.temErro()){
-            tabela.exibirTokens();
-        }
     }
 }
