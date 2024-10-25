@@ -1,10 +1,11 @@
 
 public class AnalLexico {
     LeitorArq ldat;
-    int linhaAtual;
-    boolean fimArq;
-    boolean erro;
+    int linhaAtual; //Armazena o número da linha
+    boolean fimArq; //Variável para verificar o fim do arquivo
+    boolean erro; //Variável para identificar erros
 
+    //Inicializa as variáveis
     public AnalLexico(String arq){
         this.ldat = new LeitorArq(arq);
         this.linhaAtual = 1;
@@ -12,12 +13,14 @@ public class AnalLexico {
         this.erro = false;
     }
 
+    // Metodo para verificar se houve um erro léxico
     public boolean temErro(){
         return erro;
     }
 
     public Token proxToken(){
 
+        // Verifica se chegou no fim do arquivo
         if (fimArq){
             return null;
         }
@@ -26,10 +29,11 @@ public class AnalLexico {
         char ch;
         int proxChar;
 
+        // Loop para processar os caracteres do buffer
         while((c = ldat.lerProxCaractere()) != -1){
             ch = (char) c;
 
-            // Espaço
+            // Espaços em branco e tabs
             if (ch == ' ' || ch == '\t' || ch == '\r'){
                 continue;
             }
@@ -40,9 +44,8 @@ public class AnalLexico {
                 continue;
             }
 
-            // == Igual
             switch(ch){
-                //mais de uma verificação
+                // == Igual
                 case '=': {
                     proxChar = ldat.lerProxCaractere();
                     if (proxChar == '=') {
@@ -138,11 +141,11 @@ public class AnalLexico {
                 // )  Fecha Parentesis
                 case ')': return new Token(")", TipoToken.FechaPar, linhaAtual);
 
-                // VAR, NumInt, NumReal
+                // Identificação de variáveis, números e palavras-chave e booleanos
                 default:{
                     StringBuilder buffer = new StringBuilder();
                     buffer.append(ch);
-
+                    //Verifica se é uma variável que inicia com letra minúscula
                     if (Character.isLowerCase(ch)){
                         while ((proxChar = ldat.lerProxCaractere()) != -1 &&
                         Character.isLetterOrDigit(proxChar)){
@@ -151,6 +154,7 @@ public class AnalLexico {
                         ldat.caractereAnterior();
                         return new Token(buffer.toString(), TipoToken.Var, linhaAtual);
                     }
+                    //Verifica se é um numero real ou inteiro.
                     else if (Character.isDigit(ch)){
                         boolean isReal = false;
                         while ((proxChar = ldat.lerProxCaractere()) != -1  && (Character.isDigit(proxChar) || proxChar == '.')){
@@ -170,6 +174,7 @@ public class AnalLexico {
                         ldat.caractereAnterior();
                     }
 
+                    //Identifica lexemas de palavras-chave e booleanos
                     String palavra = buffer.toString();
                     return switch (palavra) {
                         case "ENTAO" -> new Token(palavra, TipoToken.PCEntao, linhaAtual);
@@ -195,6 +200,7 @@ public class AnalLexico {
             }
         }
         fimArq = true;
+        //Retorna o token EOF para o final do arquivo
         return new Token("EOF", TipoToken.EOF, linhaAtual);
     }
 }
