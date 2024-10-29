@@ -1,12 +1,12 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class TabelaSimbolos {
+public class ListaTokens {
     // Lista para armazenar os tokens analisados
     private List<Token> tokens;
 
     // Construtor que inicializa a lista de tokens
-    public TabelaSimbolos() {
+    public ListaTokens() {
         tokens = new ArrayList<>();  // Usa ArrayList para armazenar os tokens
     }
 

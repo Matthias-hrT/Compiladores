@@ -10,7 +10,7 @@ public class Main {
         AnalLexico lex =  new AnalLexico(args[0]);
 
         // Cria uma tabela de símbolos para armazenar os tokens
-        TabelaSimbolos tabela = new TabelaSimbolos();
+        ListaTokens tabela = new ListaTokens();
 
         // Obtém o primeiro token do analisador léxico
         Token t = lex.proxToken();

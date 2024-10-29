@@ -17,7 +17,6 @@ public class AnalLexico {
         int c;
         char ch;
         int proxChar;
-
         // Loop para processar os caracteres do buffer
         while((c = ldat.lerProxCaractere()) != -1){
             ch = (char) c;
