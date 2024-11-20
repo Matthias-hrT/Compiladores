@@ -5,7 +5,7 @@
  */
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         // Inicializa o analisador léxico com o caminho do arquivo fornecido como argumento
         AnalLexico lex =  new AnalLexico(args[0]);
 
@@ -21,6 +21,9 @@ public class Main {
             t = lex.proxToken();      // Lê o próximo token
         }
         tabela.exibirTokens();
+
+        Parser parser = new Parser(tabela);
+        parser.analPrograma();
 
     }
 }
