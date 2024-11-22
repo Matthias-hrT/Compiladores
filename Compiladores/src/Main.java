@@ -22,8 +22,12 @@ public class Main {
         }
         tabela.exibirTokens();
 
+        // Cria o parser com a lista de tokens
         Parser parser = new Parser(tabela);
+        // Executa a análise sintática
         parser.analPrograma();
+
+
 
     }
 }

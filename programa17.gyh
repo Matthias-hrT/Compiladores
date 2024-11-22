@@ -1,4 +1,5 @@
-#Erro sintático: 'Esperado Token FechaPar'
+#Erro sintático: 'Inesperado Var'
+
 :DEC
 parametro:INT
 fatorial:INT
@@ -7,11 +8,11 @@ fatorial:INT
 # Calcula o fatorial de um número inteiro
 LER parametro
 fatorial := parametro 
-SE (parametro == 0) ENTAO fatorial := 1
+SE (parametro == 0) fatorial := 1
 ENQTO (parametro > 1)
  INI
-  fatorial := ((fatorial) * (parametro - 1)) 
-  parametro := (((parametro) - 1)
+  fatorial := (fatorial * (parametro - 1)) 
+  parametro := parametro - 1
  FIM
 IMPRIMIR fatorial
 IMPRIMIR "Oi"

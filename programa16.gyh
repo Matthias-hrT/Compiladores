@@ -1,4 +1,5 @@
-#Erro sintático: 'Esperado Token FechaPar'
+#Erro sintático: 'Inesperado OpRel'
+
 :DEC
 parametro:INT
 fatorial:INT
@@ -11,7 +12,7 @@ SE (parametro == 0) ENTAO fatorial := 1
 ENQTO (parametro > 1)
  INI
   fatorial := ((fatorial) * (parametro - 1)) 
-  parametro := (((parametro) - 1)
+  parametro := (((parametro) > 1))
  FIM
 IMPRIMIR fatorial
 IMPRIMIR "Oi"

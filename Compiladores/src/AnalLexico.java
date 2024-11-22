@@ -150,6 +150,7 @@ public class AnalLexico {
                         case "DEC" -> new Token(palavra, TipoToken.PCDec, linhaAtual);
                         case "PROG" -> new Token(palavra, TipoToken.PCProg, linhaAtual);
                         case "SE" -> new Token(palavra, TipoToken.PCSe, linhaAtual);
+                        case "SENAO" -> new Token(palavra, TipoToken.PCSenao, linhaAtual);
                         case "INI" -> new Token(palavra, TipoToken.PCIni, linhaAtual);
                         case "INT" -> new Token(palavra, TipoToken.PCInt, linhaAtual);
                         case "IMPRIMIR" -> new Token(palavra, TipoToken.PCImprimir, linhaAtual);
