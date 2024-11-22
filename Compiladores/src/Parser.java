@@ -5,16 +5,22 @@ public class Parser {
         this.listaTokens = tokens;
     }
 
-    private boolean match(TipoToken tipoEsperado){
+    private boolean match(TipoToken tipoEsperado) {
         while (listaTokens.atual() != null &&
-                listaTokens.atual().getTipo() == TipoToken.Comentario){
+                listaTokens.atual().getTipo() == TipoToken.Comentario) {
             listaTokens.avancar();
         }
+
         Token atual = listaTokens.atual();
 
-        if (atual != null && atual.getTipo() == tipoEsperado){
-            listaTokens.avancar();
-            return true;
+        if (atual != null && atual.getTipo() == tipoEsperado) {
+            // Apenas avança se o próximo token está na mesma linha ou se isso não importa.
+            Token proximo = listaTokens.temProximo() ? listaTokens.avancar() : null;
+            if (proximo == null || proximo.getLinha() == atual.getLinha()) {
+                return true;
+            } else {
+                listaTokens.retroceder(); // Retrocede caso tenha avançado errado
+            }
         }
         return false;
     }
@@ -26,12 +32,6 @@ public class Parser {
         Token erro = listaTokens.atual();
         if (resultado && (erro == null || erro.getTipo() == TipoToken.EOF)) {
             System.out.println("Análise sintática concluída com sucesso!");
-        } else {
-            if (erro != null) {
-                System.out.println("Erro sintático: Token inesperado '" + erro.getTipo() + "'."+ erro.getLinha());
-            } else {
-                System.out.println("Erro sintático: Tokens esperados.");
-            }
         }
     }
 
@@ -42,9 +42,7 @@ public class Parser {
                 if (parseListaDeclapacoes()){
                     if (match(TipoToken.Delim)){
                         if (match(TipoToken.PCProg)){
-                            if (parseListaComandos()){
-                                return true;
-                            }
+                            return parseListaComandos();
                         }
                     }
                 }
@@ -239,11 +237,21 @@ public class Parser {
 
     // ComandoSaida → 'IMPRIMIR' VARIAVEL | 'IMPRIMIR' CADEIA
     private boolean parseComandoSaida() {
+        Token inicio = listaTokens.atual();
+
         if (match(TipoToken.PCImprimir)) {
-            return match(TipoToken.Var) || match(TipoToken.Cadeia);
+            Token seguinte = listaTokens.atual();
+            if (seguinte != null && seguinte.getLinha() == inicio.getLinha() &&
+                    (match(TipoToken.Var) || match(TipoToken.Cadeia))) {
+                return true;
+            } else {
+                System.out.println("Erro: Comando 'IMPRIMIR' incompleto na linha " + inicio.getLinha());
+                return false;
+            }
         }
         return false; // Parsing falhou
     }
+
 
     // ComandoCondicao → 'SE' ExpressaoRelacional 'ENTAO' Comando ComandoCondicao2
     private boolean parseComandoCondicao() {
