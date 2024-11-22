@@ -6,8 +6,7 @@ public class Parser {
     }
 
     private boolean match(TipoToken tipoEsperado) {
-        while (listaTokens.atual() != null &&
-                listaTokens.atual().getTipo() == TipoToken.Comentario) {
+        if (listaTokens.atual() != null && listaTokens.atual().getTipo() == TipoToken.Comentario) {
             listaTokens.avancar();
         }
 
@@ -151,11 +150,18 @@ public class Parser {
         if (match(TipoToken.NumInt) || match(TipoToken.NumReal) || match(TipoToken.Var)) {
             return true; // É um fator válido
         } else if (match(TipoToken.AbrePar)) { // '(' ExpressaoAritmetica ')'
+            Token inicio = listaTokens.atual();
             if (parseExpressaoAritmetica()) {
-                return match(TipoToken.FechaPar);
+                Token seguinte = listaTokens.atual();
+                if (seguinte != null && seguinte.getLinha() == inicio.getLinha() && match(TipoToken.FechaPar)) {// Verifica fechamento de parênteses
+                    return true;
+                } else {
+                    System.out.println("Erro sintático: 'Esperado Token FechaPar' Linha: " + inicio.getLinha());
+                    return false;
+                }
             }
         }
-        return false; // Parsing falhou
+        return false;
     }
 
     // ExpressaoRelacional → TermoRelacional ExpressaoRelacional2
@@ -179,9 +185,10 @@ public class Parser {
             }
             return false; // Operador booleano sem TermoRelacional
         }
-        return true; // vazio
+        return true; //vazio
     }
 
+    //A DESGRACA DO ERRO ESTÁ POR AQUI!!!
     // TermoRelacional → ExpressaoAritmetica OP_REL ExpressaoAritmetica | '(' ExpressaoRelacional ')'
     private boolean parseTermoRelacional() {
         // Primeira opção: ExpressaoAritmetica OP_REL ExpressaoAritmetica
@@ -191,10 +198,17 @@ public class Parser {
             }
             return false; // Esperava OP_REL após ExpressaoAritmetica
         }
+        Token inicio = listaTokens.atual();
         // Segunda opção: '(' ExpressaoRelacional ')'
-        else if (match(TipoToken.AbrePar)) { // Verifica abertura de parênteses
+        if (match(TipoToken.AbrePar)) { // Verifica abertura de parênteses
             if (parseExpressaoRelacional()) { // Analisa a ExpressaoRelacional dentro dos parênteses
-                return match(TipoToken.FechaPar); // Verifica fechamento de parênteses
+                Token seguinte = listaTokens.atual();
+                if (seguinte != null && seguinte.getLinha() == inicio.getLinha() && match(TipoToken.FechaPar)){// Verifica fechamento de parênteses
+                    return true;
+                } else {
+                    System.out.println("Erro sintático: 'Esperado Token FechaPar' Linha: " + inicio.getLinha());
+                    return false;
+                }
             }
         }
         return false; // Parsing falhou
@@ -245,7 +259,7 @@ public class Parser {
                     (match(TipoToken.Var) || match(TipoToken.Cadeia))) {
                 return true;
             } else {
-                System.out.println("Erro: Comando 'IMPRIMIR' incompleto na linha " + inicio.getLinha());
+                System.out.println("Erro sintático: 'Esperado Token Cadeia ou Variável' Linha: " + inicio.getLinha());
                 return false;
             }
         }
@@ -287,9 +301,15 @@ public class Parser {
 
     // SubAlgoritmo → 'INI' ListaComandos 'FIM'
     private boolean parseSubAlgoritmo() {
+        Token inicio = listaTokens.atual();
         if (match(TipoToken.PCIni)) {
             if (parseListaComandos()) {
-                return match(TipoToken.PCFim);
+                if (inicio.getTipo() == TipoToken.PCIni && match(TipoToken.PCFim)){
+                    return true;
+                } else {
+                    System.out.println("Erro sintático: 'Esperado Token PCFim' Linha: " + listaTokens.atual().getLinha());
+                    return false;
+                }
             }
         }
         return false; // Parsing falhou
