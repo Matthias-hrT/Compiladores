@@ -1,48 +1,44 @@
 
 public class AnalLexico {
     LeitorArq ldat;
-    int linhaAtual;
-
+    int linhaAtual; //Armazena o número da linha
+    boolean fimArq; //Variável para verificar o fim do arquivo
+    //Inicializa as variáveis
     public AnalLexico(String arq){
         this.ldat = new LeitorArq(arq);
         this.linhaAtual = 1;
+        this.fimArq = false;
     }
-
     public Token proxToken(){
+        // Verifica se chegou no fim do arquivo
+        if (fimArq){
+            return null;
+        }
         int c;
         char ch;
         int proxChar;
-
+        // Loop para processar os caracteres do buffer
         while((c = ldat.lerProxCaractere()) != -1){
             ch = (char) c;
-
-            // Espaço
-            if (ch == ' '){
+            // Espaços em branco e tabs
+            if (ch == ' ' || ch == '\t' || ch == '\r'){
                 continue;
             }
-
             // Prox Linha
             if (ch == '\n'){
                 linhaAtual++;
                 continue;
             }
-
-            // == Igual
             switch(ch){
-                //mais de uma verificação
+                // == Igual
                 case '=': {
                     proxChar = ldat.lerProxCaractere();
                     if (proxChar == '=') {
                         return new Token("==", TipoToken.OpRelIgual, linhaAtual);
                     }
-                    else{
-                        System.out.println("Erro: simbolo inexistente '"+ ch + "'" + " na linha " + linhaAtual);
-
-                        ldat.caractereAnterior();
-                        continue;
-                    }
+                    System.out.println("Erro Léxico: < " + ch + " > linha " + linhaAtual);
+                    return null;
                 }
-
                 // <  <=  Menor/Menor Igual
                 case '<': {
                     proxChar = ldat.lerProxCaractere();
@@ -51,7 +47,6 @@ public class AnalLexico {
                     }
                     return new Token("<", TipoToken.OpRelMenor, linhaAtual);
                 }
-
                 // >  >=  Maior/Maior Igual
                 case '>': {
                     proxChar = ldat.lerProxCaractere();
@@ -60,7 +55,6 @@ public class AnalLexico {
                     }
                     return new Token(">", TipoToken.OpRelMaior, linhaAtual);
                 }
-
                 // :  :=   Delimitador/Atribuição
                 case ':': {
                     proxChar = ldat.lerProxCaractere();
@@ -70,207 +64,15 @@ public class AnalLexico {
                     ldat.caractereAnterior();
                     return new Token(":", TipoToken.Delim, linhaAtual);
                 }
-
                 // != Diferente
                 case '!': {
                     proxChar = ldat.lerProxCaractere();
                     if (proxChar == '=') {
                         return new Token("!=", TipoToken.OpRelDif, linhaAtual);
                     }
-                    System.out.println("Erro: simbolo inexistente '"+ ch + "'" + " na linha " + linhaAtual);
-                    continue;
+                    System.out.println("Erro Léxico: < " + ch + " > linha " + linhaAtual);
+                    return null;
                 }
-
-                //cases com Letras
-
-                // E, ENTAO, ENQTO
-                case 'E': {
-                    proxChar = ldat.lerProxCaractere();
-
-                    if (proxChar == 'N') {
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'T') {
-                            proxChar = ldat.lerProxCaractere();
-                            if (proxChar == 'A') {
-                                proxChar = ldat.lerProxCaractere();
-                                if (proxChar == 'O') {
-                                    return new Token("ENTAO", TipoToken.PCEntao, linhaAtual);
-                                }
-                                ldat.caractereAnterior();
-                            }
-                            ldat.caractereAnterior();
-                        }
-                        if (proxChar == 'Q') {
-                            proxChar = ldat.lerProxCaractere();
-                            if (proxChar == 'T') {
-                                proxChar = ldat.lerProxCaractere();
-                                if (proxChar == 'O') {
-                                    return new Token("ENQTO", TipoToken.PCEnqto, linhaAtual);
-                                }
-                                ldat.caractereAnterior();
-                            }
-                            ldat.caractereAnterior();
-                        }
-                        continue;
-                    }
-                    ldat.caractereAnterior();
-                    return new Token("E", TipoToken.OpBoolE, linhaAtual);
-                }
-                // OU
-                case 'O': {
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'U') {
-                        return new Token("OU", TipoToken.OpBoolOu, linhaAtual);
-                    }
-                    else{
-                        System.out.println("Erro: simbolo inexistente '"+ ch + "'" + " na linha " + linhaAtual);
-                        ldat.caractereAnterior();
-                        continue;
-                    }
-                }
-
-                // DEC
-                case 'D':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'E') {
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'C') {
-                            return new Token("DEC", TipoToken.PCDec, linhaAtual);
-                        }
-                        ldat.caractereAnterior();
-                    }
-                    ldat.caractereAnterior();
-                    continue;
-                }
-
-                // PROG
-                case 'P':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'R') {
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'O') {
-                            proxChar = ldat.lerProxCaractere();
-                            if (proxChar == 'G') {
-                                return new Token("PROG", TipoToken.PCProg, linhaAtual);
-                            }
-                            ldat.caractereAnterior();
-                            continue;
-                        }
-                        ldat.caractereAnterior();
-                        continue;
-                    }
-                    ldat.caractereAnterior();
-                    continue;
-                }
-
-                //SE
-                case 'S':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'E') {
-                        return new Token("SE", TipoToken.PCSe, linhaAtual);
-                    }
-                    System.out.println("Erro: simbolo inexistente '"+ ch + "'" + " na linha " + linhaAtual);
-                    ldat.caractereAnterior();
-                    continue;
-                }
-
-                // INI, INT, IMPRIMIR
-                case 'I':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'N') {
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'I') {
-                            return new Token("INI", TipoToken.PCIni, linhaAtual);
-                        }else if(proxChar == 'T') {
-                            return new Token("INT", TipoToken.PCInt, linhaAtual);
-                        }
-                    }else if(proxChar == 'M'){
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'P') {
-                            proxChar = ldat.lerProxCaractere();
-                            if (proxChar == 'R') {
-                                proxChar = ldat.lerProxCaractere();
-                                if (proxChar == 'I') {
-                                    proxChar = ldat.lerProxCaractere();
-                                    if(proxChar == 'M'){
-                                        proxChar = ldat.lerProxCaractere();
-                                        if (proxChar == 'I'){
-                                            proxChar = ldat.lerProxCaractere();
-                                            if (proxChar == 'R'){
-                                                return new Token("IMPRIMIR", TipoToken.PCImprimir, linhaAtual);
-                                            }
-                                            ldat.caractereAnterior();
-                                            continue;
-                                        }
-                                        ldat.caractereAnterior();
-                                        continue;
-                                    }
-                                    ldat.caractereAnterior();
-                                    continue;
-                                }
-                                ldat.caractereAnterior();
-                                continue;
-                            }
-                            ldat.caractereAnterior();
-                            continue;
-                        }
-                        ldat.caractereAnterior();
-                        continue;
-                    }
-                    ldat.caractereAnterior();
-                    continue;
-                }
-
-                // FIM
-                case 'F':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'I') {
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'M') {
-                            return new Token("FIM", TipoToken.PCFim, linhaAtual);
-                        }
-                        ldat.caractereAnterior();
-                        continue;
-                    }
-                    ldat.caractereAnterior();
-                    continue;
-                }
-
-                // REAL
-                case 'R':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'E') {
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'A') {
-                            proxChar = ldat.lerProxCaractere();
-                            if (proxChar == 'L') {
-                                return new Token("REAL", TipoToken.PCReal, linhaAtual);
-                            }
-                            ldat.caractereAnterior();
-                            continue;
-                        }
-                        ldat.caractereAnterior();
-                        continue;
-                    }
-                    ldat.caractereAnterior();
-                    continue;
-                }
-
-                // LER
-                case 'L':{
-                    proxChar = ldat.lerProxCaractere();
-                    if (proxChar == 'E') {
-                        proxChar = ldat.lerProxCaractere();
-                        if (proxChar == 'R') {
-                            return new Token("LER", TipoToken.PCLer, linhaAtual);
-                        }
-                        ldat.caractereAnterior();
-                        continue;
-                    }
-                    ldat.caractereAnterior();
-                    continue;
-                }
-
                 // CADEIA
                 case '"':{
                     StringBuilder cadeia = new StringBuilder();
@@ -281,9 +83,9 @@ public class AnalLexico {
                        }
                         cadeia.append((char)proxChar);
                     }
-                    break;
+                    System.out.println("Erro Léxico: desconhecido caractere "+ ch + " linha " + linhaAtual);
+                    return null;
                 }
-
                 // # Comentário
                 case '#':{
                     StringBuilder comentario = new StringBuilder();
@@ -294,31 +96,25 @@ public class AnalLexico {
                             return new Token(comentario.toString(), TipoToken.Comentario, linhaAtual);
                         }
                     }
+                    return new Token(comentario.toString(), TipoToken.Comentario, linhaAtual);
                 }
-
                 // +  Soma
                 case '+': return new Token("+", TipoToken.OpAritSoma, linhaAtual);
-
                 // - Subtração
                 case '-': return new Token("-", TipoToken.OpAritSub, linhaAtual);
-
                 // *  Multiplicação
                 case '*': return new Token("*", TipoToken.OpAritMult, linhaAtual);
-
                 // /  Divisão
                 case '/': return new Token("/", TipoToken.OpAritDiv, linhaAtual);
-
                 // (  Abre Parentesis
                 case '(': return new Token("(", TipoToken.AbrePar, linhaAtual);
-
                 // )  Fecha Parentesis
                 case ')': return new Token(")", TipoToken.FechaPar, linhaAtual);
-
-                // VAR, NumInt, NumReal
+                // Identificação de variáveis, números e palavras-chave e booleanos
                 default:{
                     StringBuilder buffer = new StringBuilder();
                     buffer.append(ch);
-
+                    //Verifica se é uma variável que inicia com letra minúscula
                     if (Character.isLowerCase(ch)){
                         while ((proxChar = ldat.lerProxCaractere()) != -1 &&
                         Character.isLetterOrDigit(proxChar)){
@@ -327,24 +123,52 @@ public class AnalLexico {
                         ldat.caractereAnterior();
                         return new Token(buffer.toString(), TipoToken.Var, linhaAtual);
                     }
+                    //Verifica se é um numero real ou inteiro.
                     else if (Character.isDigit(ch)){
                         boolean isReal = false;
-                        while ((proxChar = ldat.lerProxCaractere()) != -1  &&
-                                (Character.isDigit(proxChar) || proxChar == '.')){
-                            isReal = true;
+                        while ((proxChar = ldat.lerProxCaractere()) != -1  && (Character.isDigit(proxChar) || proxChar == '.')){
+                            buffer.append((char)proxChar);
+                            if (proxChar == '.') {
+                                isReal = true;
+                            }
+                        }
+                        ldat.caractereAnterior();
+                        return isReal ? new Token(buffer.toString(), TipoToken.NumReal, linhaAtual) :
+                                new Token(buffer.toString(), TipoToken.NumInt, linhaAtual);
+                    }
+                    else if (Character.isUpperCase(ch)){
+                        while ((proxChar = ldat.lerProxCaractere()) != -1 && Character.isLetterOrDigit(proxChar)){
                             buffer.append((char)proxChar);
                         }
-
-                        if (isReal){
-                            return new Token(buffer.toString(), TipoToken.NumReal, linhaAtual);
-                        } else {
-                            return new Token(buffer.toString(), TipoToken.NumInt, linhaAtual);
-                        }
+                        ldat.caractereAnterior();
                     }
-                    break;
+                    //Identifica lexemas de palavras-chave e booleanos
+                    String palavra = buffer.toString();
+                    return switch (palavra) {
+                        case "ENTAO" -> new Token(palavra, TipoToken.PCEntao, linhaAtual);
+                        case "ENQTO" -> new Token(palavra, TipoToken.PCEnqto, linhaAtual);
+                        case "DEC" -> new Token(palavra, TipoToken.PCDec, linhaAtual);
+                        case "PROG" -> new Token(palavra, TipoToken.PCProg, linhaAtual);
+                        case "SE" -> new Token(palavra, TipoToken.PCSe, linhaAtual);
+                        case "SENAO" -> new Token(palavra, TipoToken.PCSenao, linhaAtual);
+                        case "INI" -> new Token(palavra, TipoToken.PCIni, linhaAtual);
+                        case "INT" -> new Token(palavra, TipoToken.PCInt, linhaAtual);
+                        case "IMPRIMIR" -> new Token(palavra, TipoToken.PCImprimir, linhaAtual);
+                        case "FIM" -> new Token(palavra, TipoToken.PCFim, linhaAtual);
+                        case "REAL" -> new Token(palavra, TipoToken.PCReal, linhaAtual);
+                        case "LER" -> new Token(palavra, TipoToken.PCLer, linhaAtual);
+                        case "E" -> new Token(palavra, TipoToken.OpBoolE, linhaAtual);
+                        case "OU" -> new Token(palavra, TipoToken.OpBoolOu, linhaAtual);
+                        default -> {
+                            System.out.println("Erro Léxico: desconhecido < " + palavra + " > linha " + linhaAtual);
+                            yield null;
+                        }
+                    };
                 }
             }
         }
-        return null;
+        fimArq = true;
+        //Retorna o token EOF para o final do arquivo
+        return new Token("EOF", TipoToken.EOF, linhaAtual);
     }
 }
