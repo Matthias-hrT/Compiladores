@@ -20,7 +20,7 @@ public class Main {
             tabela.adicionarToken(t); // Adiciona o token à tabela de símbolos
             t = lex.proxToken();      // Lê o próximo token
         }
-        tabela.exibirTokens();
+        //tabela.exibirTokens();
 
         // Cria o parser com a lista de tokens
         Parser parser = new Parser(tabela);
