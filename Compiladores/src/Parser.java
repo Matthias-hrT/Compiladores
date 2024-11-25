@@ -10,7 +10,8 @@ public class Parser {
             listaTokens.avancar();
         }
         Token atual = listaTokens.atual();
-        if (atual != null && atual.getTipo() == tipoEsperado) {
+        System.out.println("Token atual: " + atual);
+        if (atual.getTipo() == tipoEsperado) {
             listaTokens.avancar();
             return true;
         }
@@ -23,7 +24,7 @@ public class Parser {
         } else {
             Token erro = listaTokens.atual();
             if (erro != null) {
-                System.out.printf("Erro sintático: Token '%s' ", erro.getTipo());
+                System.out.printf("Erro sintático: Token '%s'", erro.getTipo());
                 System.exit(1);
             } else {
                 System.out.println("Erro sintático: EOF inesperado.");
@@ -33,17 +34,26 @@ public class Parser {
     }
 
     private boolean parsePrograma() {
-        return match(TipoToken.Delim) &&
-                match(TipoToken.PCDec) &&
-                parseListaDeclaracoes() &&
-                match(TipoToken.Delim) &&
-                match(TipoToken.PCProg) &&
-                parseListaComandos();
+        if (match(TipoToken.Delim)) { // ':'
+            if (match(TipoToken.PCDec)) { // 'DEC'
+                if (parseListaDeclaracoes()) { // ListaDeclaracoes
+                    if (match(TipoToken.Delim)) { // ':'
+                        if (match(TipoToken.PCProg)) { // 'PROG'
+                            return parseListaComandos(); // ListaComandos
+                        }
+                    }
+                }
+            }
+        }
+        return false; // Falha se qualquer condição não for atendida
     }
 
     private boolean parseListaDeclaracoes() {
-        if (!parseDeclaracao()) return false;
-        while (parseDeclaracao());
+        if (parseDeclaracao()) return parseListaDeclaracoes2();
+        return false;
+    }
+    private boolean parseListaDeclaracoes2() {
+        if (parseDeclaracao()) return parseListaDeclaracoes2();
         return true;
     }
 
@@ -56,8 +66,11 @@ public class Parser {
     }
 
     private boolean parseListaComandos() {
-        if (!parseComando()) return false;
-        while (parseComando());
+        if (parseComando()) return parseListaComandos2();
+        return false;
+    }
+    private boolean parseListaComandos2() {
+        if (parseComando()) return parseListaComandos2();
         return true;
     }
 
@@ -93,11 +106,13 @@ public class Parser {
     }
 
     private boolean parseComandoCondicao() {
-        return match(TipoToken.PCSe) &&
-                parseExpressaoRelacional() &&
-                match(TipoToken.PCEntao) &&
-                parseComando() &&
-                parseComandoCondicao2();
+        if (match(TipoToken.PCSe)) {
+            parseExpressaoRelacional();
+            if (match(TipoToken.PCEntao)) {
+                if (parseComando()) return parseComandoCondicao2();
+            }
+        }
+        return false;
     }
 
     private boolean parseComandoCondicao2() {
@@ -111,79 +126,64 @@ public class Parser {
         return match(TipoToken.PCEnqto) && parseExpressaoRelacional() && parseComando();
     }
 
+    //SubAlgoritmo → 'INI' ListaComandos 'FIM'
     private boolean parseSubAlgoritmo() {
-        if (!match(TipoToken.PCIni)) {
-            return false;
+        if (match(TipoToken.PCIni)) {
+            if (parseListaComandos()) return match(TipoToken.PCFim);
         }
-        if (!parseListaComandos()) {
-            System.out.println("Erro sintático: 'Inesperado Token PCIni'");
-            System.exit(1);
-        }
-        if (!match(TipoToken.PCFim)) {
-            System.out.println("Erro sintático: 'Esperado Token PCFim'");
-            System.exit(1);
-        }
-        return true;
+        return false;
     }
 
     private boolean parseExpressaoAritmetica() {
-        if (parseTermoAritmetico()) return false;
-        while (match(TipoToken.OpAritSoma) || match(TipoToken.OpAritSub)) {
-            if (parseTermoAritmetico()) return false;
+        if (parseTermoAritmetico()) return parseExpressaoAritmetica2();
+        return false;
+    }
+    private boolean parseExpressaoAritmetica2() {
+        if (match(TipoToken.OpAritSoma) || match(TipoToken.OpAritSub)) {
+            if (parseTermoAritmetico()) return parseExpressaoAritmetica2();
         }
         return true;
     }
 
     private boolean parseTermoAritmetico() {
-        if (parseFatorAritmetico()) return true;
-        while (match(TipoToken.OpAritMult) || match(TipoToken.OpAritDiv)) {
-            if (parseFatorAritmetico()) return true;
+        if (parseFatorAritmetico()) return parseTermoAritmetico2();
+        return false;
+    }
+
+    private boolean parseTermoAritmetico2() {
+        if (match(TipoToken.OpAritMult) || match(TipoToken.OpAritDiv)) {
+            if (parseTermoAritmetico()) return parseTermoAritmetico2();
+        }
+        return true;
+    }
+
+    private boolean parseFatorAritmetico() {
+        if (match(TipoToken.NumInt) || match(TipoToken.NumReal) || match(TipoToken.Var)) return true;
+        if (match(TipoToken.AbrePar)) {
+            if(parseExpressaoAritmetica()) return match(TipoToken.FechaPar);
         }
         return false;
     }
 
-    private boolean parseFatorAritmetico() {
-        if (match(TipoToken.NumInt) || match(TipoToken.NumReal) || match(TipoToken.Var)) {
-            return false;
-        } else if (match(TipoToken.AbrePar)) {
-            if (!parseExpressaoAritmetica()) {
-                System.out.println("Erro sintático: Expressão aritmética esperada após Token 'AbrePar' ");
-                System.exit(1);
-            }
-            if (!match(TipoToken.FechaPar)) {
-                System.out.println("Erro sintático: Esperado Token 'FechaPar'");
-                System.exit(1);
-            }
-            return false;
-        }
-        return true;
-    }
-
     private boolean parseExpressaoRelacional() {
-        if (parseTermoRelacional()) {
-            return false;
+        if (parseTermoRelacional()) return parseExpressaoRelacional2();
+        return false;
+    }
+    private boolean parseExpressaoRelacional2() {
+        if (parseOperadorBooleano()){
+            if (parseTermoRelacional()) return parseExpressaoRelacional2();
         }
-        while (parseOperadorBooleano()) {
-            if (parseTermoRelacional()) {
-                System.out.println("Erro sintático: Termo esperado após operador booleano.");
-                System.exit(1);
-            }
-        }
-        return true;
+       return true;
     }
 
     private boolean parseTermoRelacional() {
         if (match(TipoToken.AbrePar)) {
-            if (!parseExpressaoRelacional()) {
-                System.out.println("Erro sintático: Expressão relacional esperada após '('");
-                System.exit(1);
-            }
-            if (!match(TipoToken.FechaPar)) {
-                System.out.println("Erro sintático: Esperado Token 'FechaPar' ");
-                System.exit(1);
-            }
-            return false;
-        } else return !parseExpressaoAritmetica() || !parseOpRel() || !parseExpressaoAritmetica();
+            if (parseExpressaoRelacional()) return match(TipoToken.FechaPar);
+        }
+        if (parseExpressaoAritmetica()){
+            if (parseOpRel()) return parseExpressaoAritmetica();
+        }
+        return false;
     }
 
     private boolean parseOperadorBooleano() {
