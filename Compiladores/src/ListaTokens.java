@@ -24,11 +24,10 @@ public class ListaTokens {
         return null;
     }
 
-    public Token avancar(){
+    public void avancar(){
         if (posicao < tokens.size()){
-            return tokens.get(posicao++);
+            posicao++;
         }
-        return null;
     }
 
     public void retroceder(){
