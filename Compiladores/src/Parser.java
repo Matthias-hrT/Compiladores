@@ -10,7 +10,7 @@ public class Parser {
             listaTokens.avancar();
         }
         Token atual = listaTokens.atual();
-        System.out.println("Token atual: " + atual);
+        //System.out.println("Token atual: " + atual);
         if (atual.getTipo() == tipoEsperado) {
             listaTokens.avancar();
             return true;
@@ -33,6 +33,7 @@ public class Parser {
         }
     }
 
+    //Programa → ':' 'DEC' ListaDeclaracoes ':' 'PROG' ListaComandos
     private boolean parsePrograma() {
         if (match(TipoToken.Delim)) { // ':'
             if (match(TipoToken.PCDec)) { // 'DEC'
@@ -48,32 +49,41 @@ public class Parser {
         return false; // Falha se qualquer condição não for atendida
     }
 
+    //ListaDeclaracoes →  Declaracao ListaDeclaracoes2
     private boolean parseListaDeclaracoes() {
         if (parseDeclaracao()) return parseListaDeclaracoes2();
         return false;
     }
+
+    //ListaDeclaracoes2 →  Declaracao ListaDeclaracoes2 | vazio
     private boolean parseListaDeclaracoes2() {
         if (parseDeclaracao()) return parseListaDeclaracoes2();
         return true;
     }
 
+    //Declaracao → VARIAVEL ':' TipoVar
     private boolean parseDeclaracao() {
         return match(TipoToken.Var) && match(TipoToken.Delim) && parseTipoVar();
     }
 
+    //TipoVar → 'INT' | 'REAL'
     private boolean parseTipoVar() {
         return match(TipoToken.PCInt) || match(TipoToken.PCReal);
     }
 
+    //ListaComandos → Comando ListaComandos2
     private boolean parseListaComandos() {
         if (parseComando()) return parseListaComandos2();
         return false;
     }
+
+    //ListaComandos2 →  Comando ListaComandos2 | vazio
     private boolean parseListaComandos2() {
         if (parseComando()) return parseListaComandos2();
         return true;
     }
 
+    //Comando → ComandoAtribuicao | ComandoEntrada | ComandoSaida | ComandoCondicao | ComandoRepeticao | SubAlgoritmo
     private boolean parseComando() {
         return parseComandoAtribuicao() ||
                 parseComandoEntrada() ||
@@ -83,14 +93,17 @@ public class Parser {
                 parseSubAlgoritmo();
     }
 
+    //ComandoAtribuicao → VARIAVEL ':=' ExpressaoAritmetica
     private boolean parseComandoAtribuicao() {
         return match(TipoToken.Var) && match(TipoToken.Atrib) && parseExpressaoAritmetica();
     }
 
+    //ComandoEntrada → 'LER' VARIAVEL
     private boolean parseComandoEntrada() {
         return match(TipoToken.PCLer) && match(TipoToken.Var);
     }
 
+    //ComandoSaida → 'IMPRIMIR'  VARIAVEL | 'IMPRIMIR' CADEIA
     private boolean parseComandoSaida() {
         Token inicio = listaTokens.atual();
         if (match(TipoToken.PCImprimir)) {
@@ -105,6 +118,7 @@ public class Parser {
         return false; // Parsing falhou
     }
 
+    //Comando Condicao → 'SE' ExpressaoRelacional 'ENTAO' Comando ComandoCondicao2
     private boolean parseComandoCondicao() {
         if (match(TipoToken.PCSe)) {
             parseExpressaoRelacional();
@@ -115,6 +129,7 @@ public class Parser {
         return false;
     }
 
+    //ComandoCondicao2 → 'SENAO' Comando | vazio
     private boolean parseComandoCondicao2() {
         if (match(TipoToken.PCSenao)) {
             return parseComando();
@@ -122,6 +137,7 @@ public class Parser {
         return true;
     }
 
+    //ComandoRepeticao → 'ENQTO' ExpressaoRelacional Comando
     private boolean parseComandoRepeticao() {
         return match(TipoToken.PCEnqto) && parseExpressaoRelacional() && parseComando();
     }
@@ -129,15 +145,19 @@ public class Parser {
     //SubAlgoritmo → 'INI' ListaComandos 'FIM'
     private boolean parseSubAlgoritmo() {
         if (match(TipoToken.PCIni)) {
-            if (parseListaComandos()) return match(TipoToken.PCFim);
+            parseListaComandos();
+            return match(TipoToken.PCFim);
         }
         return false;
     }
 
+    //ExpressaoAritmetica → TermoAritimetico ExpressaoAritmetica2
     private boolean parseExpressaoAritmetica() {
         if (parseTermoAritmetico()) return parseExpressaoAritmetica2();
         return false;
     }
+
+    //ExpressaoAritimetica2 →  ‘+’ TermoAritmetico ExpressaoAritmetica2 | ‘-’ TermoAritmetico ExpressaoAritmetica2 | vazio
     private boolean parseExpressaoAritmetica2() {
         if (match(TipoToken.OpAritSoma) || match(TipoToken.OpAritSub)) {
             if (parseTermoAritmetico()) return parseExpressaoAritmetica2();
@@ -145,11 +165,13 @@ public class Parser {
         return true;
     }
 
+    //TermoAritmetico → FatorAritmetico TermoAritmetico2
     private boolean parseTermoAritmetico() {
         if (parseFatorAritmetico()) return parseTermoAritmetico2();
         return false;
     }
 
+    //TemoAritimetico2 →  '*' FatorAritimetico TermoAritmetico2 |  ‘/’ FatorAritimetico TermoAritmetico2| vazio
     private boolean parseTermoAritmetico2() {
         if (match(TipoToken.OpAritMult) || match(TipoToken.OpAritDiv)) {
             if (parseTermoAritmetico()) return parseTermoAritmetico2();
@@ -157,6 +179,7 @@ public class Parser {
         return true;
     }
 
+    //FatorAritmetico → NUMINT| NUMREAL | VARIAVEL | '(' ExpressaoAritmetica ')'
     private boolean parseFatorAritmetico() {
         if (match(TipoToken.NumInt) || match(TipoToken.NumReal) || match(TipoToken.Var)) return true;
         if (match(TipoToken.AbrePar)) {
@@ -165,10 +188,13 @@ public class Parser {
         return false;
     }
 
+    //ExpressaoRelacional → TermoRelacional ExpressaoRelacional 2
     private boolean parseExpressaoRelacional() {
         if (parseTermoRelacional()) return parseExpressaoRelacional2();
         return false;
     }
+
+    //ExpressaoRelacional2 →  OperadorBooleano TermoRelacional ExpressaoRelacional2| vazio
     private boolean parseExpressaoRelacional2() {
         if (parseOperadorBooleano()){
             if (parseTermoRelacional()) return parseExpressaoRelacional2();
@@ -176,6 +202,7 @@ public class Parser {
        return true;
     }
 
+    //TermoRelacional → ExpressaoAritmetica OP_REL ExpressaoAritmetica | '(' ExpressaoRelacional ')'
     private boolean parseTermoRelacional() {
         if (match(TipoToken.AbrePar)) {
             if (parseExpressaoRelacional()) return match(TipoToken.FechaPar);
@@ -186,10 +213,12 @@ public class Parser {
         return false;
     }
 
+    //OperadorBooleano → 'E' | 'OU'
     private boolean parseOperadorBooleano() {
         return match(TipoToken.OpBoolE) || match(TipoToken.OpBoolOu);
     }
 
+    //OP_REL
     private boolean parseOpRel() {
         return match(TipoToken.OpRelMenor) ||
                 match(TipoToken.OpRelMenorIgual) ||
