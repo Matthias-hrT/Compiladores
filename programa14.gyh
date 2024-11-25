@@ -13,6 +13,6 @@ ENQTO parametro > 1
  INI
   fatorial := ((fatorial) * (parametro - 1)) 
   parametro := (((parametro) - 1))
- 
+
 IMPRIMIR fatorial
 IMPRIMIR "Oi"
