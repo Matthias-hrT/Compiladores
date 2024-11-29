@@ -1,53 +1,67 @@
-import java.util.ArrayList;
-import java.util.List;
 
 public class ListaTokens {
-    // Lista para armazenar os tokens analisados
-    private List<Token> tokens;
-    private int posicao;
+    private static class Nodo{
+        Token token;
+        Nodo anterior;
+        Nodo proximo;
 
-    // Construtor que inicializa a lista de tokens
+        Nodo(Token token){
+            this.token = token;
+        }
+    }
+
+    private Nodo inicio;
+    private Nodo atual;
+
     public ListaTokens() {
-        tokens = new ArrayList<>();  // Usa ArrayList para armazenar os tokens
-        posicao = 0;
+        inicio = null;
+        atual = null;
     }
 
-    // Metodo para adicionar um token à lista de tokens
-    public void adicionarToken(Token token) {
-        tokens.add(token);  // Adiciona o token recebido à lista
-    }
-
-    public Token atual(){
-        if(posicao < tokens.size()){
-            return tokens.get(posicao);
-        }
-        return null;
-    }
-
-    public void avancar(){
-        if (posicao < tokens.size()){
-            posicao++;
+    // Adiciona um token no final da lista
+    public void adicionar(Token token) {
+        Nodo novoNodo = new Nodo(token);
+        if (inicio == null) {
+            inicio = novoNodo;
+            atual = inicio;
+        } else {
+            Nodo temp = inicio;
+            while (temp.proximo != null) {
+                temp = temp.proximo;
+            }
+            temp.proximo = novoNodo;
+            novoNodo.anterior = temp;
         }
     }
 
-    public void retroceder(){
-        if (posicao > 0){
-            posicao--;
+    // Retorna o token atual sem avançar
+    public Token atual() {
+        return atual != null ? atual.token : null;
+    }
+
+    // Avança para o próximo token
+    public void avancar() {
+        if (atual != null) {
+            atual = atual.proximo;
         }
     }
 
-    public boolean temProximo(){
-        return posicao < tokens.size();
+    // Retrocede para o token anterior
+    public void retroceder() {
+        if (atual != null && atual.anterior != null) {
+            atual = atual.anterior;
+        }
     }
 
-    public int getPosicao(){
-        return posicao;
+    // Reinicia a lista para o início
+    public void reiniciar() {
+        atual = inicio;
     }
 
-    // Metodo para exibir todos os tokens armazenados na tabela de símbolos
     public void exibirTokens() {
-        for (Token token : tokens) {  // Itera sobre cada token na lista
-            System.out.println(token.toString());  // Chama o metodo toString do token para exibir sua representação
+        while(atual != null){
+            System.out.println(atual.token);
+            atual = atual.proximo;
         }
     }
 }
