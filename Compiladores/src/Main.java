@@ -7,7 +7,7 @@
 public class Main {
     public static void main(String[] args) throws Exception {
         // Inicializa o analisador léxico com o caminho do arquivo fornecido como argumento
-        AnalLexico lex =  new AnalLexico(args[0]);
+        AnalLexico lex =  new AnalLexico(args[8]); //programa(N-1).gyh
 
         // Cria uma tabela de símbolos para armazenar os tokens
         ListaTokens tabela = new ListaTokens();
@@ -17,7 +17,7 @@ public class Main {
 
         // Continua a leitura de tokens enquanto não houver erro e não for o fim do arquivo
         while(t != null){
-            tabela.adicionarToken(t); // Adiciona o token à tabela de símbolos
+            tabela.adicionar(t); // Adiciona o token à tabela de símbolos
             t = lex.proxToken();      // Lê o próximo token
         }
         //tabela.exibirTokens();

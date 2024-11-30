@@ -1,33 +1,59 @@
 public class Parser {
     private final ListaTokens listaTokens;
+    private int contador;
 
     public Parser(ListaTokens tokens) {
         this.listaTokens = tokens;
+        this.contador = 0;
     }
 
     private boolean match(TipoToken tipoEsperado) {
-        if (listaTokens.atual().getTipo() == TipoToken.Comentario) {
-            listaTokens.avancar();
-        }
         Token atual = listaTokens.atual();
+        if (atual.getTipo() == TipoToken.Comentario) {
+            listaTokens.avancar();
+            atual = listaTokens.atual();
+        }
         //System.out.println("Token atual: " + atual);
         if (atual.getTipo() == tipoEsperado) {
+            if (atual.getTipo() == TipoToken.FechaPar) {
+                contador--;
+            }
             listaTokens.avancar();
             return true;
         }
+
         return false;
     }
 
     public void analPrograma() {
-        if (parsePrograma() && (listaTokens.atual() == null || listaTokens.atual().getTipo() == TipoToken.EOF)) {
+        if (parsePrograma() && contador == 0 && (listaTokens.atual() == null || listaTokens.atual().getTipo() == TipoToken.EOF)) {
             System.out.println("Análise sintática concluída com sucesso!");
         } else {
+
             Token erro = listaTokens.atual();
-            if (erro != null) {
-                System.out.printf("Erro sintático: Token '%s'", erro.getTipo());
+            int linhaAtual = erro != null ? erro.getLinha() : -1;
+
+            listaTokens.avancar();
+
+            while (listaTokens.atual() != null && linhaAtual == listaTokens.atual().getLinha()) {
+                if (listaTokens.atual().getTipo() == TipoToken.FechaPar) {
+                    listaTokens.avancar();
+                    contador--;
+                } else {
+                    listaTokens.avancar();
+                }
+            }
+
+            if (contador > 0) {
+                System.out.println("Erro sintático: Token 'FechaPar'");
                 System.exit(1);
-            } else {
-                System.out.println("Erro sintático: EOF inesperado.");
+            } else if (listaTokens.atual() != null) {
+                assert erro != null;
+                System.out.println("Erro sintático: Token '" + erro.getTipo() + "'");
+                System.exit(1);
+            }else{
+                assert erro != null;
+                System.out.println("Erro sintático: Token '" + erro.getTipo() + "'");
                 System.exit(1);
             }
         }
@@ -123,7 +149,8 @@ public class Parser {
         if (match(TipoToken.PCSe)) {
             parseExpressaoRelacional();
             if (match(TipoToken.PCEntao)) {
-                if (parseComando()) return parseComandoCondicao2();
+                parseComando();
+                return parseComandoCondicao2();
             }
         }
         return false;
@@ -153,39 +180,45 @@ public class Parser {
 
     //ExpressaoAritmetica → TermoAritimetico ExpressaoAritmetica2
     private boolean parseExpressaoAritmetica() {
-        if (parseTermoAritmetico()) return parseExpressaoAritmetica2();
-        return false;
+        parseTermoAritmetico();
+        return parseExpressaoAritmetica2();
     }
 
     //ExpressaoAritimetica2 →  ‘+’ TermoAritmetico ExpressaoAritmetica2 | ‘-’ TermoAritmetico ExpressaoAritmetica2 | vazio
     private boolean parseExpressaoAritmetica2() {
         if (match(TipoToken.OpAritSoma) || match(TipoToken.OpAritSub)) {
-            if (parseTermoAritmetico()) return parseExpressaoAritmetica2();
+            parseTermoAritmetico();
+            return parseExpressaoAritmetica2();
         }
         return true;
     }
 
     //TermoAritmetico → FatorAritmetico TermoAritmetico2
-    private boolean parseTermoAritmetico() {
-        if (parseFatorAritmetico()) return parseTermoAritmetico2();
-        return false;
+    private void parseTermoAritmetico() {
+        parseFatorAritmetico();
+        parseTermoAritmetico2();
     }
 
     //TemoAritimetico2 →  '*' FatorAritimetico TermoAritmetico2 |  ‘/’ FatorAritimetico TermoAritmetico2| vazio
     private boolean parseTermoAritmetico2() {
         if (match(TipoToken.OpAritMult) || match(TipoToken.OpAritDiv)) {
-            if (parseTermoAritmetico()) return parseTermoAritmetico2();
+            parseTermoAritmetico();
+            return parseTermoAritmetico2();
         }
         return true;
     }
 
     //FatorAritmetico → NUMINT| NUMREAL | VARIAVEL | '(' ExpressaoAritmetica ')'
-    private boolean parseFatorAritmetico() {
-        if (match(TipoToken.NumInt) || match(TipoToken.NumReal) || match(TipoToken.Var)) return true;
+    private void parseFatorAritmetico() {
         if (match(TipoToken.AbrePar)) {
-            if(parseExpressaoAritmetica()) return match(TipoToken.FechaPar);
+            contador++;
+            parseExpressaoAritmetica();
+            match(TipoToken.FechaPar);
+            return;
         }
-        return false;
+        if (!match(TipoToken.NumInt) && !match(TipoToken.NumReal)) {
+            match(TipoToken.Var);
+        }
     }
 
     //ExpressaoRelacional → TermoRelacional ExpressaoRelacional 2
@@ -197,7 +230,8 @@ public class Parser {
     //ExpressaoRelacional2 →  OperadorBooleano TermoRelacional ExpressaoRelacional2| vazio
     private boolean parseExpressaoRelacional2() {
         if (parseOperadorBooleano()){
-            if (parseTermoRelacional()) return parseExpressaoRelacional2();
+            parseTermoRelacional();
+            return parseExpressaoRelacional2();
         }
        return true;
     }
@@ -205,10 +239,13 @@ public class Parser {
     //TermoRelacional → ExpressaoAritmetica OP_REL ExpressaoAritmetica | '(' ExpressaoRelacional ')'
     private boolean parseTermoRelacional() {
         if (match(TipoToken.AbrePar)) {
-            if (parseExpressaoRelacional()) return match(TipoToken.FechaPar);
+            contador++;
+            parseExpressaoRelacional();
+            return match(TipoToken.FechaPar);
         }
         if (parseExpressaoAritmetica()){
-            if (parseOpRel()) return parseExpressaoAritmetica();
+            parseOpRel();
+            return parseExpressaoAritmetica();
         }
         return false;
     }
@@ -219,12 +256,9 @@ public class Parser {
     }
 
     //OP_REL
-    private boolean parseOpRel() {
-        return match(TipoToken.OpRelMenor) ||
-                match(TipoToken.OpRelMenorIgual) ||
-                match(TipoToken.OpRelMaior) ||
-                match(TipoToken.OpRelMaiorIgual) ||
-                match(TipoToken.OpRelIgual) ||
-                match(TipoToken.OpRelDif);
+    private void parseOpRel() {
+        if (!match(TipoToken.OpRelMenor) && !match(TipoToken.OpRelMenorIgual) && !match(TipoToken.OpRelMaior) && !match(TipoToken.OpRelMaiorIgual) && !match(TipoToken.OpRelIgual)) {
+            match(TipoToken.OpRelDif);
+        }
     }
 }
