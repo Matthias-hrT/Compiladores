@@ -1,8 +1,10 @@
 public class Parser {
     private final ListaTokens listaTokens;
+    private int contador;
 
     public Parser(ListaTokens tokens) {
         this.listaTokens = tokens;
+        this.contador = 0;
     }
 
     private boolean match(TipoToken tipoEsperado) {
@@ -13,18 +15,47 @@ public class Parser {
         }
         //System.out.println("Token atual: " + atual);
         if (atual.getTipo() == tipoEsperado) {
+            if (atual.getTipo() == TipoToken.FechaPar) {
+                contador--;
+            }
             listaTokens.avancar();
             return true;
         }
+
         return false;
     }
 
     public void analPrograma() {
-        if (parsePrograma() && (listaTokens.atual() == null || listaTokens.atual().getTipo() == TipoToken.EOF)) {
+        if (parsePrograma() && contador == 0 && (listaTokens.atual() == null || listaTokens.atual().getTipo() == TipoToken.EOF)) {
             System.out.println("Análise sintática concluída com sucesso!");
         } else {
-            System.out.println("Erro sintático: Token '" + listaTokens.atual().getTipo() + "'");
-            System.exit(1);
+
+            Token erro = listaTokens.atual();
+            int linhaAtual = erro != null ? erro.getLinha() : -1;
+
+            listaTokens.avancar();
+
+            while (listaTokens.atual() != null && linhaAtual == listaTokens.atual().getLinha()) {
+                if (listaTokens.atual().getTipo() == TipoToken.FechaPar) {
+                    listaTokens.avancar();
+                    contador--;
+                } else {
+                    listaTokens.avancar();
+                }
+            }
+
+            if (contador > 0) {
+                System.out.println("Erro sintático: Token 'FechaPar'");
+                System.exit(1);
+            } else if (listaTokens.atual() != null) {
+                assert erro != null;
+                System.out.println("Erro sintático: Token '" + erro.getTipo() + "'");
+                System.exit(1);
+            }else{
+                assert erro != null;
+                System.out.println("Erro sintático: Token '" + erro.getTipo() + "'");
+                System.exit(1);
+            }
         }
     }
 
@@ -179,8 +210,8 @@ public class Parser {
 
     //FatorAritmetico → NUMINT| NUMREAL | VARIAVEL | '(' ExpressaoAritmetica ')'
     private void parseFatorAritmetico() {
-        Token inicio = listaTokens.atual();
         if (match(TipoToken.AbrePar)) {
+            contador++;
             parseExpressaoAritmetica();
             match(TipoToken.FechaPar);
             return;
@@ -208,6 +239,7 @@ public class Parser {
     //TermoRelacional → ExpressaoAritmetica OP_REL ExpressaoAritmetica | '(' ExpressaoRelacional ')'
     private boolean parseTermoRelacional() {
         if (match(TipoToken.AbrePar)) {
+            contador++;
             parseExpressaoRelacional();
             return match(TipoToken.FechaPar);
         }
