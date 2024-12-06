@@ -1,10 +1,12 @@
 public class Parser {
     private final ListaTokens listaTokens;
-    private int contador;
+    private int contPar;
+    private int contIni;
 
     public Parser(ListaTokens tokens) {
         this.listaTokens = tokens;
-        this.contador = 0;
+        this.contPar = 0;
+        this.contIni = 0;
     }
 
     private boolean match(TipoToken tipoEsperado) {
@@ -16,17 +18,19 @@ public class Parser {
         //System.out.println("Token atual: " + atual);
         if (atual.getTipo() == tipoEsperado) {
             if (atual.getTipo() == TipoToken.FechaPar) {
-                contador--;
+                contPar--;
+            }
+            if (atual.getTipo() == TipoToken.PCFim){
+                contIni--;
             }
             listaTokens.avancar();
             return true;
         }
-
         return false;
     }
 
     public void analPrograma() {
-        if (parsePrograma() && contador == 0 && (listaTokens.atual() == null || listaTokens.atual().getTipo() == TipoToken.EOF)) {
+        if (parsePrograma() && contIni == 0  && contPar == 0 && (listaTokens.atual() == null || listaTokens.atual().getTipo() == TipoToken.EOF)) {
             System.out.println("Análise sintática concluída com sucesso!");
         } else {
 
@@ -38,18 +42,29 @@ public class Parser {
             while (listaTokens.atual() != null && linhaAtual == listaTokens.atual().getLinha()) {
                 if (listaTokens.atual().getTipo() == TipoToken.FechaPar) {
                     listaTokens.avancar();
-                    contador--;
+                    contPar--;
                 } else {
                     listaTokens.avancar();
                 }
             }
 
-            if (contador > 0) {
-                System.out.println("Erro sintático: Token 'FechaPar'");
+            while (listaTokens.atual() != null) {
+                if (listaTokens.atual().getTipo() == TipoToken.PCFim) {
+                    listaTokens.avancar();
+                    contIni--;
+                } else {
+                    listaTokens.avancar();
+                }
+            }
+
+            if (contPar > 0) {
+                System.out.println("Erro sintático: Esperado Token 'FechaPar'");
                 System.exit(1);
-            } else if (listaTokens.atual() != null) {
+            }else if (contIni > 0) {
+                System.out.println("Erro sintático: Esperado Token 'PCFim'");
+            }else if (listaTokens.atual() != null) {
                 assert erro != null;
-                System.out.println("Erro sintático: Token '" + erro.getTipo() + "'");
+                System.out.println("Erro sintático: Inesperado Token '" + erro.getTipo() + "'");
                 System.exit(1);
             }else{
                 assert erro != null;
@@ -59,57 +74,134 @@ public class Parser {
         }
     }
 
-    //Programa → ':' 'DEC' ListaDeclaracoes ':' 'PROG' ListaComandos
+    // Programa → ':' 'DEC' ListaDeclaracoes ':' 'PROG' ListaComandos
     private boolean parsePrograma() {
-        if (match(TipoToken.Delim)) { // ':'
-            if (match(TipoToken.PCDec)) { // 'DEC'
-                if (parseListaDeclaracoes()) { // ListaDeclaracoes
-                    if (match(TipoToken.Delim)) { // ':'
-                        if (match(TipoToken.PCProg)) { // 'PROG'
-                            return parseListaComandos(); // ListaComandos
+        if (match(TipoToken.Delim)) {
+            if (match(TipoToken.PCDec)) {
+                if (parseListaDeclaracoes()) {
+                    if (match(TipoToken.Delim)) {
+                        if (match(TipoToken.PCProg)) {
+                            return parseListaComandos();
                         }
                     }
                 }
             }
         }
-        return false; // Falha se qualquer condição não for atendida
+        return false;
     }
 
-    //ListaDeclaracoes →  Declaracao ListaDeclaracoes2
+    // ListaDeclaracoes → Declaracao ListaDeclaracoes2
     private boolean parseListaDeclaracoes() {
         if (parseDeclaracao()) return parseListaDeclaracoes2();
         return false;
     }
 
-    //ListaDeclaracoes2 →  Declaracao ListaDeclaracoes2 | vazio
+    // ListaDeclaracoes2 → Declaracao ListaDeclaracoes2 | vazio
     private boolean parseListaDeclaracoes2() {
         if (parseDeclaracao()) return parseListaDeclaracoes2();
         return true;
     }
 
-    //Declaracao → VARIAVEL ':' TipoVar
+    // Declaracao → VARIAVEL ':' TipoVar
     private boolean parseDeclaracao() {
         return match(TipoToken.Var) && match(TipoToken.Delim) && parseTipoVar();
     }
 
-    //TipoVar → 'INT' | 'REAL'
+    // TipoVar → 'INT' | 'REAL'
     private boolean parseTipoVar() {
         return match(TipoToken.PCInt) || match(TipoToken.PCReal);
     }
 
-    //ListaComandos → Comando ListaComandos2
+    // ExpressaoAritmetica → TermoAritmetico ExpressaoAritmetica2
+    private boolean parseExpressaoAritmetica() {
+        parseTermoAritmetico();
+        return parseExpressaoAritmetica2();
+    }
+
+    // ExpressaoAritmetica2 → '+' TermoAritmetico ExpressaoAritmetica2 | '-' TermoAritmetico ExpressaoAritmetica2 | vazio
+    private boolean parseExpressaoAritmetica2() {
+        if (match(TipoToken.OpAritSoma) || match(TipoToken.OpAritSub)) {
+            parseTermoAritmetico();
+            return parseExpressaoAritmetica2();
+        }
+        return true;
+    }
+
+    // TermoAritmetico → FatorAritmetico TermoAritmetico2
+    private void parseTermoAritmetico() {
+        parseFatorAritmetico();
+        parseTermoAritmetico2();
+    }
+
+    // TermoAritmetico2 → '*' FatorAritmetico TermoAritmetico2 | '/' FatorAritmetico TermoAritmetico2 | vazio
+    private boolean parseTermoAritmetico2() {
+        if (match(TipoToken.OpAritMult) || match(TipoToken.OpAritDiv)) {
+            parseTermoAritmetico();
+            return parseTermoAritmetico2();
+        }
+        return true;
+    }
+
+    // FatorAritmetico → NUMINT | NUMREAL | VARIAVEL | '(' ExpressaoAritmetica ')'
+    private void parseFatorAritmetico() {
+        if (match(TipoToken.AbrePar)) {
+            contPar++;
+            parseExpressaoAritmetica();
+            match(TipoToken.FechaPar);
+            return;
+        }
+        if (!match(TipoToken.NumInt) && !match(TipoToken.NumReal)) {
+            match(TipoToken.Var);
+        }
+    }
+
+    // ExpressaoRelacional → TermoRelacional ExpressaoRelacional2
+    private boolean parseExpressaoRelacional() {
+        if (parseTermoRelacional()) return parseExpressaoRelacional2();
+        return false;
+    }
+
+    // ExpressaoRelacional2 → OperadorBooleano TermoRelacional ExpressaoRelacional2 | vazio
+    private boolean parseExpressaoRelacional2() {
+        if (parseOperadorBooleano()) {
+            parseTermoRelacional();
+            return parseExpressaoRelacional2();
+        }
+        return true;
+    }
+
+    // TermoRelacional → ExpressaoAritmetica OP_REL ExpressaoAritmetica | '(' ExpressaoRelacional ')'
+    private boolean parseTermoRelacional() {
+        if (match(TipoToken.AbrePar)) {
+            contPar++;
+            parseExpressaoRelacional();
+            return match(TipoToken.FechaPar);
+        }
+        if (parseExpressaoAritmetica()) {
+            parseOpRel();
+            return parseExpressaoAritmetica();
+        }
+        return false;
+    }
+
+    // OperadorBooleano → 'E' | 'OU'
+    private boolean parseOperadorBooleano() {
+        return match(TipoToken.OpBoolE) || match(TipoToken.OpBoolOu);
+    }
+
+    // ListaComandos → Comando ListaComandos2
     private boolean parseListaComandos() {
         if (parseComando()) return parseListaComandos2();
         return false;
     }
 
-    //ListaComandos2 →  Comando ListaComandos2 | vazio
+    // ListaComandos2 → Comando ListaComandos2 | vazio
     private boolean parseListaComandos2() {
         if (parseComando()) return parseListaComandos2();
         return true;
     }
 
-    //Comando → ComandoAtribuicao | ComandoEntrada | ComandoSaida | ComandoCondicao | ComandoRepeticao | SubAlgoritmo
+    // Comando → ComandoAtribuicao | ComandoEntrada | ComandoSaida | ComandoCondicao | ComandoRepeticao | SubAlgoritmo
     private boolean parseComando() {
         return parseComandoAtribuicao() ||
                 parseComandoEntrada() ||
@@ -119,32 +211,32 @@ public class Parser {
                 parseSubAlgoritmo();
     }
 
-    //ComandoAtribuicao → VARIAVEL ':=' ExpressaoAritmetica
+    // ComandoAtribuicao → VARIAVEL ':=' ExpressaoAritmetica
     private boolean parseComandoAtribuicao() {
         return match(TipoToken.Var) && match(TipoToken.Atrib) && parseExpressaoAritmetica();
     }
 
-    //ComandoEntrada → 'LER' VARIAVEL
+    // ComandoEntrada → 'LER' VARIAVEL
     private boolean parseComandoEntrada() {
         return match(TipoToken.PCLer) && match(TipoToken.Var);
     }
 
-    //ComandoSaida → 'IMPRIMIR'  VARIAVEL | 'IMPRIMIR' CADEIA
+    // ComandoSaida → 'IMPRIMIR' VARIAVEL | 'IMPRIMIR' CADEIA
     private boolean parseComandoSaida() {
         Token inicio = listaTokens.atual();
         if (match(TipoToken.PCImprimir)) {
             Token seguinte = listaTokens.atual();
-            if (seguinte != null && seguinte.getLinha() == inicio.getLinha()){
+            if (seguinte != null && seguinte.getLinha() == inicio.getLinha()) {
                 return match(TipoToken.Var) || match(TipoToken.Cadeia);
             } else {
                 System.out.println("Erro sintático: 'Esperado Token Cadeia ou Variável'");
                 System.exit(1);
             }
         }
-        return false; // Parsing falhou
+        return false;
     }
 
-    //Comando Condicao → 'SE' ExpressaoRelacional 'ENTAO' Comando ComandoCondicao2
+    // ComandoCondicao → 'SE' ExpressaoRelacional 'ENTAO' Comando ComandoCondicao2
     private boolean parseComandoCondicao() {
         if (match(TipoToken.PCSe)) {
             parseExpressaoRelacional();
@@ -156,7 +248,7 @@ public class Parser {
         return false;
     }
 
-    //ComandoCondicao2 → 'SENAO' Comando | vazio
+    // ComandoCondicao2 → 'SENAO' Comando | vazio
     private boolean parseComandoCondicao2() {
         if (match(TipoToken.PCSenao)) {
             return parseComando();
@@ -164,101 +256,29 @@ public class Parser {
         return true;
     }
 
-    //ComandoRepeticao → 'ENQTO' ExpressaoRelacional Comando
+    // ComandoRepeticao → 'ENQTO' ExpressaoRelacional Comando
     private boolean parseComandoRepeticao() {
         return match(TipoToken.PCEnqto) && parseExpressaoRelacional() && parseComando();
     }
 
-    //SubAlgoritmo → 'INI' ListaComandos 'FIM'
+    // SubAlgoritmo → 'INI' ListaComandos 'FIM'
     private boolean parseSubAlgoritmo() {
         if (match(TipoToken.PCIni)) {
+            contIni++;
             parseListaComandos();
             return match(TipoToken.PCFim);
         }
         return false;
     }
 
-    //ExpressaoAritmetica → TermoAritimetico ExpressaoAritmetica2
-    private boolean parseExpressaoAritmetica() {
-        parseTermoAritmetico();
-        return parseExpressaoAritmetica2();
-    }
 
-    //ExpressaoAritimetica2 →  ‘+’ TermoAritmetico ExpressaoAritmetica2 | ‘-’ TermoAritmetico ExpressaoAritmetica2 | vazio
-    private boolean parseExpressaoAritmetica2() {
-        if (match(TipoToken.OpAritSoma) || match(TipoToken.OpAritSub)) {
-            parseTermoAritmetico();
-            return parseExpressaoAritmetica2();
-        }
-        return true;
-    }
-
-    //TermoAritmetico → FatorAritmetico TermoAritmetico2
-    private void parseTermoAritmetico() {
-        parseFatorAritmetico();
-        parseTermoAritmetico2();
-    }
-
-    //TemoAritimetico2 →  '*' FatorAritimetico TermoAritmetico2 |  ‘/’ FatorAritimetico TermoAritmetico2| vazio
-    private boolean parseTermoAritmetico2() {
-        if (match(TipoToken.OpAritMult) || match(TipoToken.OpAritDiv)) {
-            parseTermoAritmetico();
-            return parseTermoAritmetico2();
-        }
-        return true;
-    }
-
-    //FatorAritmetico → NUMINT| NUMREAL | VARIAVEL | '(' ExpressaoAritmetica ')'
-    private void parseFatorAritmetico() {
-        if (match(TipoToken.AbrePar)) {
-            contador++;
-            parseExpressaoAritmetica();
-            match(TipoToken.FechaPar);
-            return;
-        }
-        if (!match(TipoToken.NumInt) && !match(TipoToken.NumReal)) {
-            match(TipoToken.Var);
-        }
-    }
-
-    //ExpressaoRelacional → TermoRelacional ExpressaoRelacional 2
-    private boolean parseExpressaoRelacional() {
-        if (parseTermoRelacional()) return parseExpressaoRelacional2();
-        return false;
-    }
-
-    //ExpressaoRelacional2 →  OperadorBooleano TermoRelacional ExpressaoRelacional2| vazio
-    private boolean parseExpressaoRelacional2() {
-        if (parseOperadorBooleano()){
-            parseTermoRelacional();
-            return parseExpressaoRelacional2();
-        }
-       return true;
-    }
-
-    //TermoRelacional → ExpressaoAritmetica OP_REL ExpressaoAritmetica | '(' ExpressaoRelacional ')'
-    private boolean parseTermoRelacional() {
-        if (match(TipoToken.AbrePar)) {
-            contador++;
-            parseExpressaoRelacional();
-            return match(TipoToken.FechaPar);
-        }
-        if (parseExpressaoAritmetica()){
-            parseOpRel();
-            return parseExpressaoAritmetica();
-        }
-        return false;
-    }
-
-    //OperadorBooleano → 'E' | 'OU'
-    private boolean parseOperadorBooleano() {
-        return match(TipoToken.OpBoolE) || match(TipoToken.OpBoolOu);
-    }
-
-    //OP_REL
-    private void parseOpRel() {
-        if (!match(TipoToken.OpRelMenor) && !match(TipoToken.OpRelMenorIgual) && !match(TipoToken.OpRelMaior) && !match(TipoToken.OpRelMaiorIgual) && !match(TipoToken.OpRelIgual)) {
-            match(TipoToken.OpRelDif);
-        }
+    // OpRel → '==' | '<' | '>' | '<=' | '>=' | '<>'
+    private boolean parseOpRel() {
+        return match(TipoToken.OpRelIgual) ||
+                match(TipoToken.OpRelMenor) ||
+                match(TipoToken.OpRelMaior) ||
+                match(TipoToken.OpRelMenorIgual) ||
+                match(TipoToken.OpRelMaiorIgual) ||
+                match(TipoToken.OpRelDif);
     }
 }
