@@ -1,0 +1,22 @@
+# arquivo de testes
+
+:DEC
+fatorial:INT
+parametro:INT
+
+:PROG
+
+LER fatorial
+parametro := 2*3+(2/4)-1
+IMPRIMIR parametro
+
+
+SE parametro > 3 OU fatorial < 2 ENTAO
+INI
+    parametro := 2 + fatorial
+    parametro := 4
+FIM
+SENAO
+    LER fatorial
+parametro := 2 + fatorial
+IMPRIMIR parametro
